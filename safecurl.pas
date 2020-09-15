@@ -5,6 +5,25 @@ uses windows, Process, sysutils,  classes, uMemo, uConsole;
 
 
 
+
+
+function getExecutableName():string;
+var 
+AppFileName,buffer:array[0..260] of char;
+begin
+    //       StrPLCopy(AppFileName, ApplicationFileName, 15);
+  //  GetModuleFileName(GetModuleHandle(AppFileName), Buffer, SizeOf(Buffer));
+  GetModuleFileName(0,
+  buffer,
+  SizeOf(buffer)
+  ); //r: 58
+
+  getExecutableName:=ansistring(buffer); 
+end;
+
+
+
+
 procedure RunDosCommand(DosApp : ansistring ; out sOutput:ansistring);
 const
     READ_BUFFER_SIZE = 2400;
