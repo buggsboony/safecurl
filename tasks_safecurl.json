@@ -1,0 +1,36 @@
+{
+  // See https://go.microsoft.com/fwlink/?LinkId=733558
+  // for the documentation about the tasks.json format
+  "version": "2.0.0",
+  "credentials":"USER:PASSWPRd2@IP:21"  /*seulement l'IP fonctionne pour windows*/
+  ,"safecurl":"C:\\USERS\\PATH\\TO\\safecurl.exe" 
+  ,"context":"apps"
+  ,"tasks": [         
+      {
+          "label": "ftp_upload",
+          "type": "shell",
+          "command": "${config:tasks.safecurl}",
+          "args": [
+            "-T",
+            "${file}",
+            "ftp://${config:tasks.credentials}/${config:tasks.context}/${relativeFile}",              
+            "--ftp-create-dirs"
+          ],
+          "group": "build",
+          "problemMatcher": []
+        },    
+      {
+          "label": "ftp_download",
+          "type": "shell",
+          "command": "${config:tasks.safecurl}",     
+          "args": [
+            "ftp://${config:tasks.credentials}/${config:tasks.context}/${relativeFile}",
+            "-o",
+            "${file}",
+            "--create-dirs"
+          ],
+          "group": "build",
+          "problemMatcher": []
+        }
+  ]
+}
