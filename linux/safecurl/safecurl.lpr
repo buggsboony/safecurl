@@ -104,7 +104,7 @@ sCreatedirs:='';
 
 
      (*  ****** Upload example
-safecurl.exe -T "c:\Users\myapp\folder\localfile.php" "ftp://USER:PASSWORD:21/myapp\folder\remotefile.php" --ftp-create-dirs
+safecurl.exe -T "/home/myuser/localfile.php" "ftp://USER:PASSWORD:21/myapp\folder\remotefile.php" --ftp-create-dirs
   ********
    "-T",
         "${file}",
