@@ -52,7 +52,7 @@ begin
      if n > 0
      then begin
        Inc(BytesRead, n);
-       Write('.');
+      // Write('.');
      end;
    until n <= 0;
    if BytesRead > 0 then WriteLn;
@@ -73,9 +73,19 @@ begin
   end;
 
 
+//Attention d'initialiser avant le Tstrings avec Tstrings.create;
+procedure Split(Delimiter: Char; Str: string; ListOfStrings: TStrings);
+begin
+  ListOfStrings.Clear;
+  ListOfStrings.Delimiter       := Delimiter;
+  ListOfStrings.StrictDelimiter := True; // Requires D2006 or newer.
+  ListOfStrings.DelimitedText   := Str;
+end;
+
+
   var
     command,redirect, lastline, filepath, executablePath,action, sOut, sFile,sFtpFile,sCreatedirs, sForward : ansistring;
-    list:TSTringList;
+    list, lastlist:TSTringList;
 
 
 begin
@@ -117,11 +127,9 @@ safecurl.exe -T "c:\Users\myapp\folder\localfile.php" "ftp://USER:PASSWORD:21/my
     begin
        //Upload
 
-       sFile:=paramstr(2);
-       writeln('sFile=',sFile);
+       sFile:=paramstr(2);          // writeln('sFile00=',sFile);
        sFtpFile:=paramstr(3);
-       sCreatedirs:=paramstr(4);
-       writeln('sFtpFile=',sFtpFile);
+       sCreatedirs:=paramstr(4);    //       writeln('sFtpFile=',sFtpFile);
     (*
 
     RunCommand('curl',[action
@@ -132,9 +140,20 @@ safecurl.exe -T "c:\Users\myapp\folder\localfile.php" "ftp://USER:PASSWORD:21/my
 //  //,'--output', executablePath+'safecurl.txt'
   ],sOut) ;   //le output ne fonctionne pas avec curl et runCommand
   *)
+
+// sFile:=stringReplace(sFile,'''','\''',[rfReplaceAll, rfIgnoreCase]);
+//sFile:=stringReplace(sFile,'"','\"',[rfReplaceAll, rfIgnoreCase]);
+//sFile:=stringReplace(sFile,'''','_',[rfReplaceAll, rfIgnoreCase]);
+ //  sFile:=stringReplace(sFile,'"','_',[rfReplaceAll, rfIgnoreCase]);
+
+ //writeln('sFile=',sFile);
           command :='curl'+' '+action+' "'+sFile+'" "'+sFtpFile+'" '+sCreatedirs;
 //        sFtpFile:=stringReplace(sFtpFile,'\','/',[rfReplaceAll, rfIgnoreCase]);
-           RunProcessStdErr(command, list);
+
+
+//textcolor(white); writeln('command is ',command);
+RunProcessStdErr(command, list);
+
     end else if paramcount>1 then
     begin
         //Download
@@ -142,13 +161,12 @@ safecurl.exe -T "c:\Users\myapp\folder\localfile.php" "ftp://USER:PASSWORD:21/my
        sFtpFile:=paramstr(1);
         action:=paramstr(2);
        sFile:=paramstr(3);
-       //writeln('sFile=',sFile);
        sCreatedirs:=paramstr(4);
        //writeln('sFtpFile=',sFtpFile);
        //sFile:=stringReplace(sFile,'\','/',[rfReplaceAll, rfIgnoreCase]);
 
-        command :='curl "'+sFtpFile+'" '+action+' "'+sFile+'" "'+sCreatedirs;
-        //writeln('commande:',command);
+        command :='curl "'+sFtpFile+'" '+action+' "'+sFile+'" '+sCreatedirs;
+        writeln('commande:',command);
         RunProcessStdErr(command, list);
     end;
 
@@ -156,11 +174,14 @@ safecurl.exe -T "c:\Users\myapp\folder\localfile.php" "ftp://USER:PASSWORD:21/my
 
      if(list.count>0)then
      begin
-             writeln('listcount:', list.count);
-             writeln('Output :'#13#10,list.Text);
+            // writeln('listcount:', list.count);
+         textcolor(white);
+             writeln('Output :'#13#10);
 
           textColor(blue); writeln(list.Text);
            lastline:= list[list.count-1];
+           //éclater la derniere ligne :
+
            if( pos('100 ',lastline )=1 )then
            begin
               //Success 100%
@@ -172,6 +193,8 @@ safecurl.exe -T "c:\Users\myapp\folder\localfile.php" "ftp://USER:PASSWORD:21/my
            end;
 
 
+           textcolor(white);
+           Writeln ('Execution time : ', FormatDateTime('YYYY-MM-DD hh:nn:ss',now) );
 
      end;
 end.
