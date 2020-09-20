@@ -5,25 +5,6 @@ uses windows, Process, sysutils,  classes, uMemo, uConsole;
 
 
 
-
-
-function getExecutableName():string;
-var 
-AppFileName,buffer:array[0..260] of char;
-begin
-    //       StrPLCopy(AppFileName, ApplicationFileName, 15);
-  //  GetModuleFileName(GetModuleHandle(AppFileName), Buffer, SizeOf(Buffer));
-  GetModuleFileName(0,
-  buffer,
-  SizeOf(buffer)
-  ); //r: 58
-
-  getExecutableName:=ansistring(buffer); 
-end;
-
-
-
-
 procedure RunDosCommand(DosApp : ansistring ; out sOutput:ansistring);
 const
     READ_BUFFER_SIZE = 2400;
@@ -127,8 +108,8 @@ executablePath := extractFilePath(filepath);
 sFile:='';
 sFtpFile:='';
 sCreatedirs:='';
-  (*  ****** Upload example
-safecurl.exe -T "c:\Users\myapp\folder\localfile.php" "ftp://USER:PASSWORD:21/myapp\folder\remotefile.php" --ftp-create-dirs
+  (*  ****** Upload
+safecurl.exe -T "c:\Users\W596554\Documents\dev\PROJETS\CLOUDCATS\digiborne_LOCAL\kalysta\tests\query file.php" "ftp://envol972:innovations%40972@10.70.138.16:21/apps/kalysta\tests\query file.php" --ftp-create-dirs
   ********
    "-T",
         "${file}",
@@ -173,7 +154,7 @@ safecurl.exe -T "c:\Users\myapp\folder\localfile.php" "ftp://USER:PASSWORD:21/my
        //writeln('sFile=',sFile);
        sCreatedirs:=paramstr(4);
        //writeln('sFtpFile=',sFtpFile);
-        sFile:=stringReplace(sFile,'\','/',[rfReplaceAll, rfIgnoreCase]);
+        sFtpFile:=stringReplace(sFtpFile,'\','/',[rfReplaceAll, rfIgnoreCase]);
 
         command :='C:\windows\system32\curl.exe "'+sFtpFile+'" '+action+' "'+sFile+'" "'+sCreatedirs;
         //writeln('commande:',command);
@@ -186,10 +167,14 @@ list.text:=sOut;
     puts(command, 3); //color 4 = rouge, 2 = vert
 
     writeln('Output :'#13#10,sOut);
-//writeln('listcount:', list.count);
+    //writeln('listcount:', list.count);
 //puts(sOut, 3); //color 4 = rouge, 3 = bleu
  lastline:= list[list.count-1];
- if( pos(lastline,'100   ')=0 )then
+
+//writeln( 'pos=', pos(lastline,'100   ')  );
+// writeln('lastline ['+lastline+'] pos=', pos('curl:', lastline)  );
+// writeln('lastline ['+lastline+'] pos de 100 =', pos('100 ',lastline ));
+ if( pos('100 ',lastline )=1 )then
  begin
     //Success 100%
     puts('OK Success', 2); //color 4 = rouge, 2 = vert
@@ -197,6 +182,7 @@ list.text:=sOut;
     puts('KO Failed',4);
  end;
 
+ Writeln ('Execution time : ', DateTimeToStr(Now) );  
 
 
 end.
