@@ -84,7 +84,7 @@ end;
 
 
   var
-    command,redirect, lastline, filepath, executablePath,action, sOut, sFile,sFtpFile,sCreatedirs, sForward : ansistring;
+    command,redirect, lastline, filepath, executablePath,curlAction,action, sOut, sFile,sFtpFile,sCreatedirs, sForward : ansistring;
     list, lastlist:TSTringList;
 
 
@@ -97,14 +97,14 @@ sFile:='';
 sFtpFile:='';
 sCreatedirs:='';
 
-    writeln('SafeCurl V1.0');
+    writeln('SafeCurl V1.3');
 
 
    list := TstringList.create;
 
 
      (*  ****** Upload example
-safecurl.exe -T "c:\Users\myapp\folder\localfile.php" "ftp://USER:PASSWORD:21/myapp\folder\remotefile.php" --ftp-create-dirs
+safecurl.exe -T "/home/myuser/localfile.php" "ftp://USER:PASSWORD:21/myapp\folder\remotefile.php" --ftp-create-dirs
   ********
    "-T",
         "${file}",
@@ -126,28 +126,14 @@ safecurl.exe -T "c:\Users\myapp\folder\localfile.php" "ftp://USER:PASSWORD:21/my
     if(action='-T')then
     begin
        //Upload
-
+       curlAction:='Upload';
        sFile:=paramstr(2);          // writeln('sFile00=',sFile);
        sFtpFile:=paramstr(3);
        sCreatedirs:=paramstr(4);    //       writeln('sFtpFile=',sFtpFile);
-    (*
 
-    RunCommand('curl',[action
-  , sFile
-  ,sFtpFile
-  ,sCreatedirs
-  , redirect
-//  //,'--output', executablePath+'safecurl.txt'
-  ],sOut) ;   //le output ne fonctionne pas avec curl et runCommand
-  *)
+       curlAction:=curlAction +' file '+sFile;
 
-// sFile:=stringReplace(sFile,'''','\''',[rfReplaceAll, rfIgnoreCase]);
-//sFile:=stringReplace(sFile,'"','\"',[rfReplaceAll, rfIgnoreCase]);
-//sFile:=stringReplace(sFile,'''','_',[rfReplaceAll, rfIgnoreCase]);
- //  sFile:=stringReplace(sFile,'"','_',[rfReplaceAll, rfIgnoreCase]);
-
- //writeln('sFile=',sFile);
-          command :='curl'+' '+action+' "'+sFile+'" "'+sFtpFile+'" '+sCreatedirs;
+       command :='curl'+' '+action+' "'+sFile+'" "'+sFtpFile+'" '+sCreatedirs;
 //        sFtpFile:=stringReplace(sFtpFile,'\','/',[rfReplaceAll, rfIgnoreCase]);
 
 
@@ -157,19 +143,18 @@ RunProcessStdErr(command, list);
     end else if paramcount>1 then
     begin
         //Download
-
+          curlAction:='Download';
        sFtpFile:=paramstr(1);
         action:=paramstr(2);
        sFile:=paramstr(3);
        sCreatedirs:=paramstr(4);
        //writeln('sFtpFile=',sFtpFile);
        //sFile:=stringReplace(sFile,'\','/',[rfReplaceAll, rfIgnoreCase]);
-
+       curlAction:=curlAction ' -> '+sFile;
         command :='curl "'+sFtpFile+'" '+action+' "'+sFile+'" '+sCreatedirs;
         writeln('commande:',command);
         RunProcessStdErr(command, list);
     end;
-
 
 
      if(list.count>0)then
@@ -180,15 +165,10 @@ RunProcessStdErr(command, list);
 
           textColor(blue); writeln(list.Text);
            lastline:= list[list.count-1];
+
+           //écrire la curl Action
+           textcolor(Cyan);  writeln(curlAction);  textcolor(white);
            //éclater la derniere ligne :
-lastlist:=TstringList.create;
-               Split( '     ', lastline,lastlist);
-
-               writeln('zero:',lastlist[0]);
-                              writeln('UN:',lastlist[1]);
-                                             writeln('deux:',lastlist[2]);
-                      writeln('trois:',lastlist[3]);          writeln('quatre:',lastlist[4]);
-
            if( pos('100 ',lastline )=1 )then
            begin
               //Success 100%
