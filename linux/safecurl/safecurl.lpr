@@ -161,11 +161,15 @@ RunProcessStdErr(command, list);
      begin
             // writeln('listcount:', list.count);
          textcolor(white);
-             writeln('Output :'#13#10);
+          writeln('Output :'#13#10);
 
           textColor(blue); writeln(list.Text);
            lastline:= list[list.count-1];
 
+
+           //execution time
+           textcolor(white);
+           Writeln ('Execution time : ', FormatDateTime('YYYY-MM-DD hh:nn:ss',now) );
            //écrire la curl Action
            textcolor(Cyan);  writeln(curlAction);  textcolor(white);
            //éclater la derniere ligne :
@@ -180,8 +184,7 @@ RunProcessStdErr(command, list);
            end;
 
 
-           textcolor(white);
-           Writeln ('Execution time : ', FormatDateTime('YYYY-MM-DD hh:nn:ss',now) );
+
 
      end;
 end.

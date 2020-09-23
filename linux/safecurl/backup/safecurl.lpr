@@ -150,7 +150,7 @@ RunProcessStdErr(command, list);
        sCreatedirs:=paramstr(4);
        //writeln('sFtpFile=',sFtpFile);
        //sFile:=stringReplace(sFile,'\','/',[rfReplaceAll, rfIgnoreCase]);
-       curlAction:=curlAction ' -> '+sFile;
+       curlAction:=curlAction + ' -> '+sFile;
         command :='curl "'+sFtpFile+'" '+action+' "'+sFile+'" '+sCreatedirs;
         writeln('commande:',command);
         RunProcessStdErr(command, list);
