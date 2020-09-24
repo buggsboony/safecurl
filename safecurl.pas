@@ -86,12 +86,12 @@ end;
 
 
 var
-command, lastline, filepath, executablePath,action, sOut, sFile,sFtpFile,sCreatedirs, sForward : ansistring;
+command, lastline, filepath, executablePath,action, sOut,curlAction, sFile,sFtpFile,sCreatedirs, sForward : ansistring;
 list:TSTringList;
 
 begin
 
-writeln('SafeCurl V1.0');
+writeln('SafeCurl V1.3');
 // writeln('replac');
 //  sForward:=stringReplace(sFtpFile,'\','/',[rfReplaceAll, rfIgnoreCase]);
 // writeln(sForward);
@@ -131,13 +131,16 @@ safecurl.exe -T "c:\Users\W596554\Documents\dev\PROJETS\CLOUDCATS\digiborne_LOCA
     if(action='-T')then  
     begin        
        //Upload
-       
+              curlAction:='Upload';
        sFile:=paramstr(2);
        //writeln('sFile=',sFile);
        sFtpFile:=paramstr(3);
        sCreatedirs:=paramstr(4);
        //writeln('sFtpFile=',sFtpFile);
         sFtpFile:=stringReplace(sFtpFile,'\','/',[rfReplaceAll, rfIgnoreCase]);
+
+curlAction:=curlAction +' file '+sFile;
+
 
         command :='C:\windows\system32\curl.exe'+' '+action+' "'+sFile+'" "'+sFtpFile+'" '+sCreatedirs;
         //writeln('commande:',command);
@@ -147,7 +150,8 @@ safecurl.exe -T "c:\Users\W596554\Documents\dev\PROJETS\CLOUDCATS\digiborne_LOCA
     end else
     begin
         //Download
-
+      //Download
+          curlAction:='Download';
        sFtpFile:=paramstr(1);
         action:=paramstr(2);  
        sFile:=paramstr(3);
@@ -155,7 +159,7 @@ safecurl.exe -T "c:\Users\W596554\Documents\dev\PROJETS\CLOUDCATS\digiborne_LOCA
        sCreatedirs:=paramstr(4);
        //writeln('sFtpFile=',sFtpFile);
         sFtpFile:=stringReplace(sFtpFile,'\','/',[rfReplaceAll, rfIgnoreCase]);
-
+      curlAction:=curlAction + ' -> '+sFile;
         command :='C:\windows\system32\curl.exe "'+sFtpFile+'" '+action+' "'+sFile+'" "'+sCreatedirs;
         //writeln('commande:',command);
         RunDosCommand(command, sOut);
@@ -168,12 +172,17 @@ list.text:=sOut;
 
     writeln('Output :'#13#10,sOut);
     //writeln('listcount:', list.count);
-//puts(sOut, 3); //color 4 = rouge, 3 = bleu
+//puts(sOut, 3); //color 4 = rouge, 3 = bleu,  6 = Jaune
  lastline:= list[list.count-1];
 
 //writeln( 'pos=', pos(lastline,'100   ')  );
 // writeln('lastline ['+lastline+'] pos=', pos('curl:', lastline)  );
 // writeln('lastline ['+lastline+'] pos de 100 =', pos('100 ',lastline ));
+
+    
+   Writeln ('Execution time : ', DateTimeToStr(Now) );  
+    //écrire la curl Action
+   puts(curlAction, 9 );
  if( pos('100 ',lastline )=1 )then
  begin
     //Success 100%
@@ -182,7 +191,7 @@ list.text:=sOut;
     puts('KO Failed',4);
  end;
 
- Writeln ('Execution time : ', DateTimeToStr(Now) );  
+
 
 
 end.
