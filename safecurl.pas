@@ -86,12 +86,14 @@ end;
 
 
 var
-command, lastline, filepath, executablePath,action, sOut,curlAction, sFile,sFtpFile,sCreatedirs, sForward : ansistring;
+command,process_cmd, process_arg1,process_arg2,process_name, event_com, lastline, filepath, executablePath,action, sOut,curlAction, sFile,sFtpFile,sCreatedirs, sForward 
+
+: ansistring;
 list:TSTringList;
 
 begin
 
-writeln('SafeCurl V1.3');
+writeln('SafeCurl V1.32');
 // writeln('replac');
 //  sForward:=stringReplace(sFtpFile,'\','/',[rfReplaceAll, rfIgnoreCase]);
 // writeln(sForward);
@@ -131,16 +133,16 @@ safecurl.exe -T "c:\Users\W596554\Documents\dev\PROJETS\CLOUDCATS\digiborne_LOCA
     if(action='-T')then  
     begin        
        //Upload
-              curlAction:='Upload';
+       curlAction:='Upload';
        sFile:=paramstr(2);
        //writeln('sFile=',sFile);
        sFtpFile:=paramstr(3);
        sCreatedirs:=paramstr(4);
+              event_com:=paramstr(5);
        //writeln('sFtpFile=',sFtpFile);
         sFtpFile:=stringReplace(sFtpFile,'\','/',[rfReplaceAll, rfIgnoreCase]);
 
-curlAction:=curlAction +' file '+sFile;
-
+        curlAction:=curlAction +' file '+sFile;
 
         command :='C:\windows\system32\curl.exe'+' '+action+' "'+sFile+'" "'+sFtpFile+'" '+sCreatedirs;
         //writeln('commande:',command);
@@ -157,11 +159,31 @@ curlAction:=curlAction +' file '+sFile;
        sFile:=paramstr(3);
        //writeln('sFile=',sFile);
        sCreatedirs:=paramstr(4);
+        event_com:=paramstr(5);
        //writeln('sFtpFile=',sFtpFile);
         sFtpFile:=stringReplace(sFtpFile,'\','/',[rfReplaceAll, rfIgnoreCase]);
       curlAction:=curlAction + ' -> '+sFile;
         command :='C:\windows\system32\curl.exe "'+sFtpFile+'" '+action+' "'+sFile+'" "'+sCreatedirs;
         //writeln('commande:',command);
+
+    if(event_com='--before') then
+    begin
+    writeln('--before');
+        process_name :=paramstr(6);
+        process_arg1 :=paramstr(7);
+        process_arg2 :=paramstr(8);
+        //writeln('ok 3 params');
+//         process_cmd:= process_name+' "'+process_arg1+'"'+' "'+process_arg2+'"';
+//         (process_cmd,sOut);
+
+ 
+         RunCommand(process_name,[process_arg1, process_arg2 ],sOut) ; 
+
+         writeln(sOut);
+ 
+   
+    end;
+
         RunDosCommand(command, sOut);
     end;
 
@@ -179,7 +201,7 @@ list.text:=sOut;
 // writeln('lastline ['+lastline+'] pos=', pos('curl:', lastline)  );
 // writeln('lastline ['+lastline+'] pos de 100 =', pos('100 ',lastline ));
 
-    
+   
    Writeln ('Execution time : ', DateTimeToStr(Now) );  
     //écrire la curl Action
    puts(curlAction, 9 );
