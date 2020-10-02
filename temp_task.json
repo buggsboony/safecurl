@@ -1,0 +1,15 @@
+{
+    "label": "DOWNLOAD",
+    "type": "shell",
+    "command": "${config:tasks.safecurl}",     
+    "args": [
+      "ftp://${config:tasks.credentials}/${config:tasks.context}/${relativeFile}",
+      "-o",
+      "${file}",
+      "--create-dirs",
+      "--success",
+      ".vscode/metadata/safecurl/${relativeFile}"
+    ],
+    "group": "build",
+    "problemMatcher": []
+  }

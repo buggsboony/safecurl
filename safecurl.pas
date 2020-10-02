@@ -1,7 +1,7 @@
 program safecurl;
 
 {$mode objfpc}
-uses windows, Process, sysutils,  classes, uMemo, uConsole;
+uses windows, Process, sysutils,  classes, base64, uMemo, uConsole;
 
 
 
@@ -86,14 +86,15 @@ end;
 
 
 var
-command,process_cmd, process_arg1,process_arg2,process_name, event_com, lastline, filepath, executablePath,action, sOut,curlAction, sFile,sFtpFile,sCreatedirs, sForward 
-
+snapfilepath,
+command,curlExe,curlAct,process_cmd, process_arg1,process_arg2,process_name, event_com, lastline, filepath, executablePath,action, sOut,curlAction, sFile,sFtpFile,sCreatedirs, sForward 
 : ansistring;
-list:TSTringList;
+res:boolean;
+list,snapshotLines:TSTringList;
 
 begin
 
-writeln('SafeCurl V1.32');
+writeln('SafeCurl V1.34');
 // writeln('replac');
 //  sForward:=stringReplace(sFtpFile,'\','/',[rfReplaceAll, rfIgnoreCase]);
 // writeln(sForward);
@@ -106,6 +107,7 @@ writeln('SafeCurl V1.32');
 filepath := getExecutableName;
 executablePath := extractFilePath(filepath); 
 
+curlExe := 'C:\windows\system32\curl.exe';
 
 sFile:='';
 sFtpFile:='';
@@ -129,10 +131,15 @@ safecurl.exe -T "c:\Users\W596554\Documents\dev\PROJETS\CLOUDCATS\digiborne_LOCA
     begin
         action:=paramstr(1);    
     end;
+
+
+
+
     
     if(action='-T')then  
     begin        
        //Upload
+       curlAct:='Upload';
        curlAction:='Upload';
        sFile:=paramstr(2);
        //writeln('sFile=',sFile);
@@ -144,7 +151,7 @@ safecurl.exe -T "c:\Users\W596554\Documents\dev\PROJETS\CLOUDCATS\digiborne_LOCA
 
         curlAction:=curlAction +' file '+sFile;
 
-        command :='C:\windows\system32\curl.exe'+' '+action+' "'+sFile+'" "'+sFtpFile+'" '+sCreatedirs;
+        command :=curlExe+' '+action+' "'+sFile+'" "'+sFtpFile+'" '+sCreatedirs;
         //writeln('commande:',command);
 
         RunDosCommand(command, sOut);
@@ -153,6 +160,7 @@ safecurl.exe -T "c:\Users\W596554\Documents\dev\PROJETS\CLOUDCATS\digiborne_LOCA
     begin
         //Download
       //Download
+          curlAct:='Download';
           curlAction:='Download';
        sFtpFile:=paramstr(1);
         action:=paramstr(2);  
@@ -163,28 +171,11 @@ safecurl.exe -T "c:\Users\W596554\Documents\dev\PROJETS\CLOUDCATS\digiborne_LOCA
        //writeln('sFtpFile=',sFtpFile);
         sFtpFile:=stringReplace(sFtpFile,'\','/',[rfReplaceAll, rfIgnoreCase]);
       curlAction:=curlAction + ' -> '+sFile;
-        command :='C:\windows\system32\curl.exe "'+sFtpFile+'" '+action+' "'+sFile+'" "'+sCreatedirs;
-        //writeln('commande:',command);
-
-    if(event_com='--before') then
-    begin
-    writeln('--before');
-        process_name :=paramstr(6);
-        process_arg1 :=paramstr(7);
-        process_arg2 :=paramstr(8);
-        //writeln('ok 3 params');
-//         process_cmd:= process_name+' "'+process_arg1+'"'+' "'+process_arg2+'"';
-//         (process_cmd,sOut);
-
- 
-         RunCommand(process_name,[process_arg1, process_arg2 ],sOut) ; 
-
-         writeln(sOut);
- 
-   
-    end;
-
+        command :=curlExe+' "'+sFtpFile+'" '+action+' "'+sFile+'" "'+sCreatedirs;
+        
+        //writeln('commande:',command);  
         RunDosCommand(command, sOut);
+        
     end;
 
 list:= TstringList.create;
@@ -208,7 +199,30 @@ list.text:=sOut;
  if( pos('100 ',lastline )=1 )then
  begin
     //Success 100%
-    puts('OK Success', 2); //color 4 = rouge, 2 = vert
+    puts('OK Success', 2); //color 4 = rouge, 2 = vert    
+        if(event_com='--success') then
+        begin
+       //verboz writeln('CurlAction',curlAction);
+            if(curlAct ='Download')then
+            begin
+                //Check ftp Infos :
+                process_arg1:=paramstr(6);
+                res := ForceDirectories( extractFilePath(  process_arg1) );
+                //verboz writeln('ForceDirs = ', res);
+                process_cmd :=curlExe+' -I "'+sFtpFile+'"';
+                //Write in snapshot file
+               //if verboz writeln('info commande:'); writeln(process_cmd);
+                RunCommand(process_cmd, sOut);
+               //if verboz writeln('process_result',sOut);
+               snapshotLines:= TStringList.create;
+               snapshotLines.append(sOut);
+               process_arg2:=EncodeStringBase64(process_arg1)+'.scu';
+               snapshotLines.saveToFile(process_arg2);
+               puts('Remote file infos saved, "'+process_arg2+'", size : '+ inttostr( Length(snapshotLines.Text) ) ,3);
+            end;
+
+        end;
+
  end else begin
     puts('KO Failed',4);
  end;
