@@ -1,6 +1,6 @@
 program safecurl;
 
-uses crt,Process, sysutils,  classes;
+uses crt,Process, sysutils,  classes, base64;
 
 
 
@@ -85,7 +85,49 @@ end;
 
   var
     command,redirect, lastline, filepath, executablePath,curlAction,action, sOut, sFile,sFtpFile,sCreatedirs, sForward : ansistring;
-    list, lastlist:TSTringList;
+  realSnapFile,snapFilePath, basename, curlExe,curlAct,process_cmd, process_arg1,process_arg2,process_name, event_com:AnsiString;
+    list, lastlist ,snapshotLines, tempStrings:TSTringList;
+     canPush,res:boolean;
+     iloop:integer;
+
+
+
+
+procedure saveSnapShotFile(curlAct:AnsiString);
+var save_updated, get_refresh:AnsiString;
+begin
+   if(curlAct ='Upload') then
+   begin
+       get_refresh:= 'Updating';
+      save_updated:= 'Updated';
+
+   end else
+   begin
+      get_refresh:= 'Getting';
+      save_updated:= 'Saved';
+     end;
+
+  //Check ftp Infos :
+                            process_arg1:=paramstr(6);
+                            res := ForceDirectories( extractFilePath(process_arg1) );
+
+                            //verboz writeln('ForceDirs = ', res);
+                            process_cmd :=curlExe+' -I "'+sFtpFile+'"';
+                            //Write in snapshot file
+                           //if verboz writeln('info commande:'); writeln(process_cmd);
+                           textcolor(cyan);
+                           write(get_refresh+' infos ... ');
+                            RunCommand(process_cmd, sOut);
+                           //if verboz writeln('process_result',sOut);
+                           snapshotLines:= TStringList.create;
+//                           snapshotLines.append(sOut);
+                             snapshotLines.Text:=sOut;
+                           process_arg2:=process_arg1;
+                           basename:=ExtractFileName(process_arg2);
+                           process_arg2:=extractFilePath(process_arg1)+EncodeStringBase64(basename);
+                           snapshotLines.saveToFile(process_arg2);
+                           writeln(' '+save_updated+', "'+process_arg2+'", size : '+ inttostr( Length(snapshotLines.Text) ) ,3);
+end;
 
 
 begin
@@ -97,26 +139,13 @@ sFile:='';
 sFtpFile:='';
 sCreatedirs:='';
 
-    writeln('SafeCurl V1.3');
+    writeln('SafeCurl V1.34');
 
+
+         curlExe := 'curl';
 
    list := TstringList.create;
 
-
-     (*  ****** Upload example
-safecurl.exe -T "/home/myuser/localfile.php" "ftp://USER:PASSWORD:21/myapp\folder\remotefile.php" --ftp-create-dirs
-  ********
-   "-T",
-        "${file}",
-        "ftp://${config:tasks.credentials}/${config:tasks.context}/${relativeFile}",
-        "--ftp-create-dirs"
-    *)
-    (* ***  Download
-  "ftp://${config:tasks.credentials}/${config:tasks.context}/${relativeFile}",
-        "-o",
-        "${file}",
-        "--create-dirs"
-    *)
 
     if( paramcount() > 1)then
     begin
@@ -125,24 +154,78 @@ safecurl.exe -T "/home/myuser/localfile.php" "ftp://USER:PASSWORD:21/myapp\folde
 
     if(action='-T')then
     begin
-       //Upload
+       //Upload      //////////////////////////////////////////////////////////////////////  UPLOAD  -------------------------------
+
+          curlAct:='Upload';
        curlAction:='Upload';
        sFile:=paramstr(2);          // writeln('sFile00=',sFile);
        sFtpFile:=paramstr(3);
        sCreatedirs:=paramstr(4);    //       writeln('sFtpFile=',sFtpFile);
-
+             event_com:=paramstr(5); //--check
        curlAction:=curlAction +' file '+sFile;
 
-       command :='curl'+' '+action+' "'+sFile+'" "'+sFtpFile+'" '+sCreatedirs;
-//        sFtpFile:=stringReplace(sFtpFile,'\','/',[rfReplaceAll, rfIgnoreCase]);
+       if( event_com ='--check') then
+       begin
+              //Check ftp Infos before upload :
+            process_arg1:=paramstr(6);
+            process_cmd :=curlExe+' -I "'+sFtpFile+'"';
+            //Write in snapshot file
+           //if verboz writeln('info commande:'); writeln(process_cmd);
+           writeln('Check remote before upload...');
+            RunCommand(process_cmd, sOut);
+           //if verboz writeln('process_result',sOut);
+           snapFilePath:= ExtractFilePath(process_arg1);
+           basename:=ExtractFileName(process_arg1);
+           //writeln('snapfilepath ======= ', snapFilePath);
+           //writeln('basname ======= ', basename);
+           realSnapFile:=EncodeStringBase64(basename);
+           //writeln('realSnapFile ----- ', realSnapFile);
+
+           snapshotLines:= TStringList.create; tempStrings:= TStringList.create;
+           tempStrings.Text:=sOut;
+           snapshotLines.LoadFromFile(snapFilePath+realSnapFile);
+
+           if( snapshotLines.Text = tempStrings.Text) then
+           begin
+               canPush := true;
+           end else
+           begin
+             canPush := false;
+                textcolor(red); writeln('Destination file has been modified !');
+                textcolor(LightGray);
+               writeln('SnapShot : ', snapshotLines[0] +' - '+ snapshotLines[1]);
+               textcolor(red);
+               writeln('Remote   : ', tempStrings[0] +' - '+ tempStrings[1] );
+               writeln(curlAct+' aborted !');
+               textcolor(LightGray);
+               halt;
+           end;
+
+       end;  //endcheck
 
 
-//textcolor(white); writeln('command is ',command);
-RunProcessStdErr(command, list);
 
-    end else if paramcount>1 then
+          if( canPush ) then
+          begin
+               command :=curlExe+' '+action+' "'+sFile+'" "'+sFtpFile+'" '+sCreatedirs;
+        //        sFtpFile:=stringReplace(sFtpFile,'\','/',[rfReplaceAll, rfIgnoreCase]);
+
+              //textcolor(LightGray); writeln('command is ',command);
+              RunProcessStdErr(command, list);
+          end;
+
+
+
+
+
+
+
+
+
+    end else if paramcount>1 then                      ////////////////////////////////////  Download  ----------------------
     begin
         //Download
+          curlAct:='Download';
           curlAction:='Download';
        sFtpFile:=paramstr(1);
         action:=paramstr(2);
@@ -151,37 +234,64 @@ RunProcessStdErr(command, list);
        //writeln('sFtpFile=',sFtpFile);
        //sFile:=stringReplace(sFile,'\','/',[rfReplaceAll, rfIgnoreCase]);
        curlAction:=curlAction + ' -> '+sFile;
-        command :='curl "'+sFtpFile+'" '+action+' "'+sFile+'" '+sCreatedirs;
+               event_com:=paramstr(5);
+
+        command :=curlExe+' "'+sFtpFile+'" '+action+' "'+sFile+'" '+sCreatedirs;
         writeln('commande:',command);
         RunProcessStdErr(command, list);
     end;
 
 
+
+
+
+
+
+
+
+
      if(list.count>0)then
      begin
             // writeln('listcount:', list.count);
-         textcolor(white);
-             writeln('Output :'#13#10);
+         textcolor(LightGray);
+          writeln('Output :'#13#10);
 
           textColor(blue); writeln(list.Text);
            lastline:= list[list.count-1];
 
+           //execution time
+           textcolor(lightGray);
+           Writeln ('Execution time : ', FormatDateTime('YYYY-MM-DD hh:nn:ss',now) );
            //écrire la curl Action
-           textcolor(Cyan);  writeln(curlAction);  textcolor(white);
+           textcolor(Cyan);  writeln(curlAction);  textcolor(LightGray);
            //éclater la derniere ligne :
            if( pos('100 ',lastline )=1 )then
            begin
               //Success 100%
                  textcolor(lightgreen);
               writeln('OK Success');
+                    if(event_com='--check') then
+                    begin
+                   //verboz writeln('CurlAction',curlAction);
+                        if(curlAct ='Download')then
+                        begin
+                          saveSnapShotFile(curlAct);
+                        end else
+                        if(curlAct ='Upload') then
+                        begin
+
+                          saveSnapShotFile(curlAct);
+
+                        end;
+
+                     end;
            end else begin
              textcolor(lightred);
               writeln('KO Failed');
            end;
 
 
-           textcolor(white);
-           Writeln ('Execution time : ', FormatDateTime('YYYY-MM-DD hh:nn:ss',now) );
+           textcolor(LightGray);
 
      end;
 end.
