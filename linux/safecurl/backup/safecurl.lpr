@@ -87,8 +87,8 @@ end;
     command,redirect, lastline, filepath, executablePath,curlAction,action, sOut, sFile,sFtpFile,sCreatedirs, sForward : ansistring;
   realSnapFile,snapFilePath, basename, curlExe,curlAct,process_cmd, process_arg1,process_arg2,process_name, event_com:AnsiString;
     list, lastlist ,snapshotLines, tempStrings:TSTringList;
-     canPush,res:boolean;
-     iloop:integer;
+     bRes, canPush,res:boolean;
+    iRes, iloop:integer;
 
 
 
@@ -103,7 +103,7 @@ begin
 
    end else
    begin
-      get_refresh:= 'Getting';
+      get_refresh:= 'Receiving';
       save_updated:= 'Saved';
      end;
 
@@ -170,35 +170,54 @@ sCreatedirs:='';
             process_arg1:=paramstr(6);
             process_cmd :=curlExe+' -I "'+sFtpFile+'"';
             //Write in snapshot file
-           //if verboz writeln('info commande:'); writeln(process_cmd);
+           //if verboz             writeln('info commande:'); writeln(process_cmd);              halt;
            writeln('Check remote before upload...');
-            RunCommand(process_cmd, sOut);
+           bRes := RunCommand(process_cmd,sOut );
            //if verboz writeln('process_result',sOut);
-           snapFilePath:= ExtractFilePath(process_arg1);
-           basename:=ExtractFileName(process_arg1);
-           //writeln('snapfilepath ======= ', snapFilePath);
-           //writeln('basname ======= ', basename);
-           realSnapFile:=EncodeStringBase64(basename);
-           //writeln('realSnapFile ----- ', realSnapFile);
 
-           snapshotLines:= TStringList.create; tempStrings:= TStringList.create;
-           tempStrings.Text:=sOut;
-           snapshotLines.LoadFromFile(snapFilePath+realSnapFile);
+//
 
-           if( snapshotLines.Text = tempStrings.Text) then
-           begin
-               canPush := true;
+           if( not bRes )then
+           begin //repeat command and get error message
+               RunProcessStdErr(process_cmd, list);
+               lastline := list[list.Count-1];
+                   if( Pos('curl: (19)',lastline) = 1) //curl: (19) Given file does not exist
+                   then begin //File does not exists, allow upload
+                    textcolor(yellow);
+                    writeln('Remote file does not exists');
+                    textcolor(lightgray);
+                   canPush := true;
+                   end;
            end else
            begin
-             canPush := false;
-                textcolor(red); writeln('Destination file has been modified !');
-                textcolor(LightGray);
-               writeln('SnapShot : ', snapshotLines[0] +' - '+ snapshotLines[1]);
-               textcolor(red);
-               writeln('Remote   : ', tempStrings[0] +' - '+ tempStrings[1] );
-               writeln(curlAct+' aborted !');
-               textcolor(LightGray);
-               halt;
+                 //check version in last snap
+                   snapFilePath:= ExtractFilePath(process_arg1);
+                   basename:=ExtractFileName(process_arg1);
+                   //writeln('snapfilepath ======= ', snapFilePath);
+                   //writeln('basname ======= ', basename);
+                   realSnapFile:=EncodeStringBase64(basename);
+                   //writeln('realSnapFile ----- ', realSnapFile);
+
+                   snapshotLines:= TStringList.create; tempStrings:= TStringList.create;
+                   tempStrings.Text:=sOut;
+                   snapshotLines.LoadFromFile(snapFilePath+realSnapFile);
+
+                   if( snapshotLines.Text = tempStrings.Text) then
+                   begin
+                       canPush := true;
+                   end else
+                   begin
+                     canPush := false;
+                        textcolor(red); writeln('Destination file has been modified !');
+                        textcolor(LightGray);
+                       writeln('SnapShot : ', snapshotLines[0] +' - '+ snapshotLines[1]);
+                       textcolor(red);
+                       writeln('Remote   : ', tempStrings[0] +' - '+ tempStrings[1] );
+                       writeln(curlAct+' aborted !');
+                       textcolor(LightGray);
+                       halt;
+                   end;
+
            end;
 
        end;  //endcheck
