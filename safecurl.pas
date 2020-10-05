@@ -86,23 +86,59 @@ end;
 
 
 var
-snapfilepath,
-command,curlExe,curlAct,process_cmd, process_arg1,process_arg2,process_name, event_com, lastline, filepath, executablePath,action, sOut,curlAction, sFile,sFtpFile,sCreatedirs, sForward 
-: ansistring;
-res:boolean;
-list,snapshotLines:TSTringList;
+command,curlExe,curlAct,process_cmd, process_arg1,process_arg2,process_name, event_com, lastline, filepath, executablePath,action, sOut,curlAction, sFile,sFtpFile,sCreatedirs, sForward : ansistring;
+realSnapFile,snapFilePath, basename:AnsiString;
+ bRes, canPush,res:boolean;
+list,snapshotLines, tempStrings :TSTringList; 
+ iRes, iloop:integer;
+
+
+
+
+
+ //puts('cyan?', 9 ); puts('blue ?', 3 );
+procedure saveSnapShotFile(curlAct:AnsiString);
+var save_updated, get_refresh:AnsiString;
+begin
+   if(curlAct ='Upload') then
+   begin
+       get_refresh:= 'Updating';
+      save_updated:= 'Updated';
+
+   end else
+   begin
+      get_refresh:= 'Receiving';
+      save_updated:= 'Saved';
+     end;
+
+  //Check ftp Infos :
+                            process_arg1:=paramstr(6);
+                            res := ForceDirectories( extractFilePath(process_arg1) );
+
+                            //verboz writeln('ForceDirs = ', res);
+                            process_cmd :=curlExe+' -I "'+sFtpFile+'"';
+                            //Write in snapshot file
+                           //if verboz writeln('info commande:'); writeln(process_cmd);                           
+                           puts(get_refresh+' infos ... ', 9);
+                            RunCommand(process_cmd, sOut);
+                           //if verboz writeln('process_result',sOut);
+                           snapshotLines:= TStringList.create;
+//                           snapshotLines.append(sOut);
+                             snapshotLines.Text:=sOut;
+                           process_arg2:=process_arg1;
+                           basename:=ExtractFileName(process_arg2);
+                           process_arg2:=extractFilePath(process_arg1)+EncodeStringBase64(basename);
+                           snapshotLines.saveToFile(process_arg2);
+                           writeln(save_updated+', "'+process_arg2+'", size : '+ inttostr( Length(snapshotLines.Text) ) ,3);
+end;
+
+
+
+
 
 begin
 
-writeln('SafeCurl V1.34');
-// writeln('replac');
-//  sForward:=stringReplace(sFtpFile,'\','/',[rfReplaceAll, rfIgnoreCase]);
-// writeln(sForward);
-// exit;
-
-//  runcommand('curl',['--help'],sOutput);
-//   writeln(sOutput);
-//   exit;
+writeln('SafeCurl V1.41');
 
 filepath := getExecutableName;
 executablePath := extractFilePath(filepath); 
@@ -154,8 +190,68 @@ safecurl.exe -T "c:\Users\W596554\Documents\dev\PROJETS\CLOUDCATS\digiborne_LOCA
         command :=curlExe+' '+action+' "'+sFile+'" "'+sFtpFile+'" '+sCreatedirs;
         //writeln('commande:',command);
 
+
+       if( event_com ='--check') then
+       begin
+              //Check ftp Infos before upload :
+            process_arg1:=paramstr(6);
+            process_cmd :=curlExe+' -I "'+sFtpFile+'"';
+            //Write in snapshot file
+           //if verboz             writeln('info commande:'); writeln(process_cmd);              halt;
+           writeln('Check remote before upload...');
+           bRes := RunCommand(process_cmd,sOut );
+           //if verboz writeln('process_result',sOut);
+
+//
+
+           if( not bRes )then
+           begin //repeat command and get error message
+               RunDosCommand(process_cmd, sOut);
+               list:= TstringList.create;
+               list.text:=sOut;
+               lastline := list[list.Count-1];
+                   if( Pos('curl: (19)',lastline) = 1) //curl: (19) Given file does not exist
+                   then begin //File does not exists, allow upload                     
+                    puts('Remote file does not exists', 3); //c'étant censé être du Magenta             
+                   canPush := true;
+                   end;
+           end else
+           begin
+                 //check version in last snap
+                   snapFilePath:= ExtractFilePath(process_arg1);
+                   basename:=ExtractFileName(process_arg1);
+                   //writeln('snapfilepath ======= ', snapFilePath);
+                   //writeln('basname ======= ', basename);
+                   realSnapFile:=EncodeStringBase64(basename);
+                   //writeln('realSnapFile ----- ', realSnapFile);
+
+                   snapshotLines:= TStringList.create; tempStrings:= TStringList.create;
+                   tempStrings.Text:=sOut;
+                   snapshotLines.LoadFromFile(snapFilePath+realSnapFile);
+
+                   if( snapshotLines.Text = tempStrings.Text) then
+                   begin
+                       canPush := true;
+                   end else
+                   begin
+                     canPush := false;
+                       puts('Destination file has been modified !',4); //Red, error                        
+                       writeln('SnapShot : ', snapshotLines[0] +' - '+ snapshotLines[1]);            
+                       puts('Remote   : '+ tempStrings[0] +' - '+ tempStrings[1] , 4);
+                       puts(curlAct+' aborted !', 4); //Red,Error
+                       halt;
+                   end;
+
+           end;
+
+       end;  //endcheck
+
+    if( canPush ) then
+    begin
+
         RunDosCommand(command, sOut);
-    
+    end;
+
     end else
     begin
         //Download
@@ -200,28 +296,22 @@ list.text:=sOut;
  begin
     //Success 100%
     puts('OK Success', 2); //color 4 = rouge, 2 = vert    
-        if(event_com='--success') then
-        begin
-       //verboz writeln('CurlAction',curlAction);
-            if(curlAct ='Download')then
-            begin
-                //Check ftp Infos :
-                process_arg1:=paramstr(6);
-                res := ForceDirectories( extractFilePath(  process_arg1) );
-                //verboz writeln('ForceDirs = ', res);
-                process_cmd :=curlExe+' -I "'+sFtpFile+'"';
-                //Write in snapshot file
-               //if verboz writeln('info commande:'); writeln(process_cmd);
-                RunCommand(process_cmd, sOut);
-               //if verboz writeln('process_result',sOut);
-               snapshotLines:= TStringList.create;
-               snapshotLines.append(sOut);
-               process_arg2:=EncodeStringBase64(process_arg1)+'.scu';
-               snapshotLines.saveToFile(process_arg2);
-               puts('Remote file infos saved, "'+process_arg2+'", size : '+ inttostr( Length(snapshotLines.Text) ) ,3);
-            end;
+   
+    if(event_com='--check') then
+    begin
+        //verboz writeln('CurlAction',curlAction);
+                if(curlAct ='Download')then
+                begin
+                saveSnapShotFile(curlAct);
+                end else
+                if(curlAct ='Upload') then
+                begin
 
-        end;
+                saveSnapShotFile(curlAct);
+
+                end;
+
+    end;
 
  end else begin
     puts('KO Failed',4);
