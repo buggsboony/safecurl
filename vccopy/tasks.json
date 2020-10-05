@@ -10,10 +10,12 @@
         "command": "${config:tasks.vccopy}",     
         "args": [
           "download",
-          "\\\\CHEMIN\\RESEAU\\PROJECT_NAME\\", //Remote path
+          "\\\\REMOTE_PATH\\TO\\YOUR_REMOTE\\PROJECT\\", //Remote path
           "${relativeFile}",
           "${file}",
-          "PROJECT_NAME_FOLDER\\" //context (partie à enlever dans le chemin relatif)
+          "LOCAL_PROJECT\\" //context (partie à enlever dans le chemin relatif)
+          ,"--check"
+          ,".vscode/metadata/${relativeFile}"
           //,"verbose"
         ],
         "group": "build",
@@ -26,13 +28,15 @@
       "args": [
         "upload",
         "${file}",
-        "\\\\CHEMIN\\RESEAU\\PROJECT_NAME\\", //Remote path
+        "\\\\REMOTE_PATH\\TO\\YOUR_REMOTE\\PROJECT\\", //Remote path
         "${relativeFile}",
-        "PROJECT_NAME_FOLDER\\" /*context (partie à enlever dans le chemin relatif)*/
-       /* ,"verbose"*/
+        "LOCAL_PROJECT\\" //context (partie à enlever dans le chemin relatif)
+        ,"--check"
+        ,".vscode/metadata/${relativeFile}"
+       // ,"verbose"
       ],
       "group": "build",
       "problemMatcher": []
-  }   
+  }
     ]
   }
