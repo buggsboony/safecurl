@@ -179,6 +179,7 @@ sCreatedirs:='';
 
            if( not bRes )then
            begin //repeat command and get error message
+               list:= TStringList.create; // just in case
                RunProcessStdErr(process_cmd, list);
                lastline := list[list.Count-1];
                    if( Pos('curl: (19)',lastline) = 1) //curl: (19) Given file does not exist
@@ -200,8 +201,20 @@ sCreatedirs:='';
 
                    snapshotLines:= TStringList.create; tempStrings:= TStringList.create;
                    tempStrings.Text:=sOut;
-                   snapshotLines.LoadFromFile(snapFilePath+realSnapFile);
 
+                   realSnapFile:=snapFilePath+realSnapFile;
+                   if( not FileExists(realSnapFile) ) then
+                   begin
+                     canPush := false;
+                     textcolor(red); writeln('Comparison file does not exists !');  
+                       writeln(' Stopped !');
+                       textcolor(LightGray);
+                       halt;
+                   end else
+                   begin
+                    snapshotLines.LoadFromFile(realSnapFile);
+                   end;
+                   
                    if( snapshotLines.Text = tempStrings.Text) then
                    begin
                        canPush := true;
