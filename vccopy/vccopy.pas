@@ -56,7 +56,7 @@ end; //snapShotFile
 
 begin
 
-writeln('VcCopy V1.2');
+writeln('VcCopy V1.28');
 
 
 filepath := getExecutableName;
@@ -99,6 +99,11 @@ sCreatedirs:='';
       begin
         //get remote file modification time
          writeln('Check remote file modification date');
+             if( not fileExists(sFtpFile) ) then
+               begin
+                  puts('Remote file does not exists',5);
+                  canPush:=true;
+               end;
          fa := FileAge(sFtpFile);
          If fa<>-1 then
          begin
@@ -140,7 +145,7 @@ sCreatedirs:='';
       curlAction:=curlAction +' file '+sFile; 
 
       if(canPush)then
-      begin
+      begin  
             copResult := CopyFile(Pchar(sFile), Pchar(sFtpFile), false);             
       end else
       begin      
