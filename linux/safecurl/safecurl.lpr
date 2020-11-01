@@ -73,6 +73,49 @@ begin
   end;
 
 
+      
+
+
+//Attention d'initialiser avant le Tstrings avec Tstrings.create;
+procedure SplitSpaces(Str: string; ListOfStrings: TStrings);
+var i:integer;
+pstr:pstring;
+ch:Char;
+word:AnsiString;
+store, storeq :boolean;
+begin
+      store:=false;
+ListOfStrings.Clear;
+      pstr:=@str;
+      word:='';
+      for i:=1 to length(pstr[0]) do   {length is 89}
+      begin
+           ch := pstr[0][i];  {http://eqcode.com/wiki/CharAt}
+           storeq:=store;
+           if( (ch<>' ') ) then
+           begin
+                store:=true;
+           end else begin
+            store:=false;
+           end;
+
+           if(store)then begin
+                   word:=word+ch;
+           end;
+
+           if( (not store) and (storeq<>store) ) then begin
+              //save word (append list);
+            ListOfStrings.append(word);
+            //reset word
+            word:='';
+           end;
+      end;
+
+      if( Length(word) >0 ) then begin  ListOfStrings.append(word); //the last one
+       end;
+
+end;
+
 //Attention d'initialiser avant le Tstrings avec Tstrings.create;
 procedure Split(Delimiter: Char; Str: string; ListOfStrings: TStrings);
 begin
@@ -86,11 +129,18 @@ end;
   var
     command,redirect, lastline, filepath, executablePath,curlAction,action, sOut, sFile,sFtpFile,sCreatedirs, sForward : ansistring;
   realSnapFile,snapFilePath, basename, curlExe,curlAct,process_cmd, process_arg1,process_arg2,process_name, event_com:AnsiString;
-    list, lastlist ,snapshotLines, tempStrings:TSTringList;
+    list, lastlist ,snapshotLines, tempStrings, lastLineParts:TSTringList;
      bRes, canPush,res:boolean;
     iRes, iloop:integer;
 
-
+    action_percent: AnsiString;//0
+   action_size :AnsiString;//1
+   download_percent  :AnsiString;//2
+   download_size  :AnsiString;//3
+   upload_percent  :AnsiString;//4
+   upload_size  :AnsiString;//5
+                      action_succeed:boolean;
+             search_size:AnsiString;
 
 
 procedure saveSnapShotFile(curlAct:AnsiString);
@@ -296,8 +346,46 @@ sCreatedirs:='';
            Writeln ('Execution time : ', FormatDateTime('YYYY-MM-DD hh:nn:ss',now) );
            //écrire la curl Action
            textcolor(Cyan);  writeln(curlAction);  textcolor(LightGray);
+
            //éclater la derniere ligne :
-           if( pos('100 ',lastline )=1 )then
+
+           lastLineParts:= TStringList.create;
+           SplitSpaces(lastline, lastLineParts);
+
+
+
+               action_percent:=lastLineParts[0]; //0
+               action_size :=lastLineParts[1];//1
+               download_percent :=lastLineParts[2];//2
+               download_size:=lastLineParts[3];
+               upload_percent :=lastLineParts[4];
+               upload_size :=lastLineParts[5];
+
+               action_succeed  :=false;
+
+
+                 if(curlAct ='Download')then
+                 begin
+                     search_size :=   download_size;
+                 end else
+                 if(curlAct ='Upload') then
+                    begin
+                       search_size := upload_size;
+                   end;
+
+//writeln('search size',search_size);          writeln('search perce', action_percent);
+  if( pos('100 ', lastline )=1 )then
+  begin
+      action_succeed :=true;
+  end;
+
+  if( (search_size='0') and (action_percent='0')  ) then
+  begin
+      action_succeed :=true;
+  end;
+
+
+           if( action_succeed )then
            begin
               //Success 100%
                  textcolor(lightgreen);
