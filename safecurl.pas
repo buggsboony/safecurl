@@ -210,7 +210,7 @@ safecurl.exe -T "c:\Users\W596554\Documents\dev\PROJETS\CLOUDCATS\digiborne_LOCA
                list:= TstringList.create;
                list.text:=sOut;
                lastline := list[list.Count-1];
-                   if( Pos('curl: (19)',lastline) = 1) //curl: (19) Given file does not exist
+                   if(  ( Pos('curl: (19)',lastline) = 1) or (Pos('curl: (78)',lastline) = 1) )//curl: (19) Given file does not exist  OR curl: (78) Given file does not exist                  
                    then begin //File does not exists, allow upload                     
                     puts('Remote file does not exists', 3); //c'étant censé être du Magenta             
                    canPush := true;

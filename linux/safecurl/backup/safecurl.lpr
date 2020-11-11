@@ -232,7 +232,7 @@ sCreatedirs:='';
                list:= TStringList.create; // just in case
                RunProcessStdErr(process_cmd, list);
                lastline := list[list.Count-1];
-                   if( Pos('curl: (19)',lastline) = 1) //curl: (19) Given file does not exist
+                   if(  ( Pos('curl: (19)',lastline) = 1) or Pos('curl: (78)',lastline) = 1) )//curl: (19) Given file does not exist  OR curl: (78) Given file does not exist
                    then begin //File does not exists, allow upload
                     textcolor(LightMagenta);
                     writeln('Remote file does not exists');
@@ -372,8 +372,8 @@ sCreatedirs:='';
                     begin
                        search_size := upload_size;
                    end;
-          writeln('search size',search_size);
-           writeln('search perce', action_percent);
+
+//writeln('search size',search_size);          writeln('search perce', action_percent);
   if( pos('100 ', lastline )=1 )then
   begin
       action_succeed :=true;
