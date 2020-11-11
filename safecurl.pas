@@ -138,7 +138,7 @@ end;
 
 begin
 
-writeln('SafeCurl V1.41');
+writeln('SafeCurl V1.48');
 
 filepath := getExecutableName;
 executablePath := extractFilePath(filepath); 

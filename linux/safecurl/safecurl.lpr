@@ -189,7 +189,7 @@ sFile:='';
 sFtpFile:='';
 sCreatedirs:='';
 
-    writeln('SafeCurl V1.34');
+    writeln('SafeCurl V1.46');
 
 
          curlExe := 'curl';
