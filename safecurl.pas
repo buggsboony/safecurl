@@ -135,10 +135,10 @@ end;
 
 
 
-
+var version:AnsiString='V1.48b';
 begin
 
-writeln('SafeCurl V1.48');
+writeln('SafeCurl '+version);
 
 filepath := getExecutableName;
 executablePath := extractFilePath(filepath); 
@@ -212,9 +212,15 @@ safecurl.exe -T "c:\Users\W596554\Documents\dev\PROJETS\CLOUDCATS\digiborne_LOCA
                lastline := list[list.Count-1];
                    if(  ( Pos('curl: (19)',lastline) = 1) or (Pos('curl: (78)',lastline) = 1) )//curl: (19) Given file does not exist  OR curl: (78) Given file does not exist                  
                    then begin //File does not exists, allow upload                     
-                    puts('Remote file does not exists', 3); //c'étant censé être du Magenta             
+                    puts('Remote file does not exists.', 3); //c'étant censé être du Magenta             
                    canPush := true;
                    end;
+                   
+                   if(  ( Pos('curl: (9)',lastline) = 1)  )//curl: (9) Server denied you to change to the given directory
+                   then begin //path does not exists, allow upload                                  
+                    puts('Remote path will be created.', 3); //c'étant censé être du Magenta             
+                    canPush := true;
+                   end;                   
            end else
            begin
                  //check version in last snap

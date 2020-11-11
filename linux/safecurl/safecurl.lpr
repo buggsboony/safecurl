@@ -179,6 +179,7 @@ begin
                            writeln(' '+save_updated+', "'+process_arg2+'", size : '+ inttostr( Length(snapshotLines.Text) ) ,3);
 end;
 
+   var version : ansistring='V1.48';
 
 begin
 
@@ -189,7 +190,7 @@ sFile:='';
 sFtpFile:='';
 sCreatedirs:='';
 
-    writeln('SafeCurl V1.46');
+    writeln('SafeCurl '+version);
 
 
          curlExe := 'curl';
@@ -225,7 +226,6 @@ sCreatedirs:='';
            bRes := RunCommand(process_cmd,sOut );
            //if verboz writeln('process_result',sOut);
 
-//
 
            if( not bRes )then
            begin //repeat command and get error message
@@ -239,6 +239,15 @@ sCreatedirs:='';
                     textcolor(lightgray);
                    canPush := true;
                    end;
+
+                   if(  ( Pos('curl: (9)',lastline) = 1)  )//curl: (9) Server denied you to change to the given directory
+                   then begin //path does not exists, allow upload
+                    textcolor(LightMagenta);
+                    writeln('Remote path will be created');
+                    textcolor(lightgray);
+                   canPush := true;
+                   end;
+
            end else
            begin
                  //check version in last snap
