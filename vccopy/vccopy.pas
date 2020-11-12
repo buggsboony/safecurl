@@ -1,4 +1,4 @@
-program safecurl;
+program safecopy;
 
 {$mode objfpc}
 uses windows, Process, sysutils,  classes, uMemo, uConsole, base64;
@@ -54,9 +54,10 @@ Begin
    end;   
 end; //snapShotFile
 
+var version : AnsiString='v1.31';
 begin
 
-writeln('VcCopy V1.28');
+writeln('VcCopy '+version);
 
 
 filepath := getExecutableName;
@@ -146,6 +147,10 @@ sCreatedirs:='';
 
       if(canPush)then
       begin  
+      //force create directory :   
+         bRes := ForceDirectories( extractFilePath(sFtpFile) );
+         if(bRes) then puts('Path exists '+ extractFilePath(sFtpFile), 2);         
+
             copResult := CopyFile(Pchar(sFile), Pchar(sFtpFile), false);             
       end else
       begin      
