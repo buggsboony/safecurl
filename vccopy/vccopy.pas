@@ -1,4 +1,4 @@
-program safecopy;
+program vccopy;
 
 {$mode objfpc}
 uses windows, Process, sysutils,  classes, uMemo, uConsole, base64;
@@ -54,7 +54,7 @@ Begin
    end;   
 end; //snapShotFile
 
-var version : AnsiString='v1.31';
+var version : AnsiString='v1.33';
 begin
 
 writeln('VcCopy '+version);
