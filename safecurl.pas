@@ -157,7 +157,7 @@ var
 command,curlExe,curlAct,process_cmd, process_arg1,process_arg2,process_name, event_com, lastline, filepath, executablePath,action, sOut,curlAction, sFile,sFtpFile,sCreatedirs, sForward : ansistring;
 realSnapFile,snapFilePath, basename:AnsiString;
  bRes, canPush,res:boolean;
-list,snapshotLines, tempStrings :TSTringList; 
+list,snapshotLines, tempStrings , lastLineParts :TSTringList; 
  iRes, iloop:integer;
 
 
