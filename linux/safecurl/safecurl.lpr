@@ -179,7 +179,7 @@ begin
                            writeln(' '+save_updated+', "'+process_arg2+'", size : '+ inttostr( Length(snapshotLines.Text) ) ,3);
 end;
 
-   var version : ansistring='V1.48';
+   var version : ansistring='V1.51 linux';
 
 begin
 
@@ -211,7 +211,7 @@ sCreatedirs:='';
        curlAction:='Upload';
        sFile:=paramstr(2);          // writeln('sFile00=',sFile);
        sFtpFile:=paramstr(3);
-       sCreatedirs:=paramstr(4);    //       writeln('sFtpFile=',sFtpFile);
+       sCreatedirs:=paramstr(4);         //writeln('sFtpFile=',sFtpFile);
              event_com:=paramstr(5); //--check
        curlAction:=curlAction +' file '+sFile;
 
@@ -362,13 +362,14 @@ sCreatedirs:='';
            SplitSpaces(lastline, lastLineParts);
 
 
+//             writeln('lastlineparts.Count=' ,lastLineParts.Count);
 
-               action_percent:=lastLineParts[0]; //0
-               action_size :=lastLineParts[1];//1
-               download_percent :=lastLineParts[2];//2
-               download_size:=lastLineParts[3];
-               upload_percent :=lastLineParts[4];
-               upload_size :=lastLineParts[5];
+           if(lastLineParts.Count>=1) then             action_percent:=lastLineParts[0]; //0
+           if(lastLineParts.Count>=2) then             action_size :=lastLineParts[1];//1
+           if(lastLineParts.Count>=3) then             download_percent :=lastLineParts[2];//2
+           if(lastLineParts.Count>=4) then             download_size:=lastLineParts[3];
+           if(lastLineParts.Count>=5) then             upload_percent :=lastLineParts[4];
+          if(lastLineParts.Count>=6)  then  upload_size :=lastLineParts[5];
 
                action_succeed  :=false;
 
@@ -393,12 +394,19 @@ sCreatedirs:='';
       action_succeed :=true;
   end;
 
+//  writeln('lastline='+lastline+':', Pos('curl: (',lastline) );
+          //Vérification supplémentaire de cas d'erreur
+          if(  ( Pos('curl: (',lastline) >=0)  ) then
+          begin
+                 action_succeed:=false;
+          end;
+
 
            if( action_succeed )then
            begin
               //Success 100%
                  textcolor(lightgreen);
-              writeln('OK Success');
+              writeln('OK Success !'+lastline);
                     if(event_com='--check') then
                     begin
                    //verboz writeln('CurlAction',curlAction);
