@@ -92,7 +92,7 @@ end;
 
 
 //Attention d'initialiser avant le Tstrings avec Tstrings.create;
-procedure SplitSpaces(Str: string; ListOfStrings: TStrings);
+procedure SplitSpaces(Str: Ansistring; ListOfStrings: TStringList);
 var i:integer;
 pstr:pstring;
 ch:Char;
@@ -100,13 +100,16 @@ word:AnsiString;
 store, storeq :boolean;
 begin
       store:=false;
-ListOfStrings.Clear;
+      ListOfStrings:=TStringList.create; //ListOfStrings.Clear;  
+
       pstr:=@str;
       word:='';
+ 
       for i:=1 to length(pstr[0]) do   {length is 89}
       begin
            ch := pstr[0][i];  {http://eqcode.com/wiki/CharAt}
            storeq:=store;
+                
            if( (ch<>' ') ) then
            begin
                 store:=true;
@@ -117,7 +120,7 @@ ListOfStrings.Clear;
            if(store)then begin
                    word:=word+ch;
            end;
-
+  
            if( (not store) and (storeq<>store) ) then begin
               //save word (append list);
             ListOfStrings.append(word);
@@ -125,7 +128,7 @@ ListOfStrings.Clear;
             word:='';
            end;
       end;
-
+  
       if( Length(word) >0 ) then begin  ListOfStrings.append(word); //the last one
        end;
 
@@ -139,7 +142,6 @@ begin
   ListOfStrings.StrictDelimiter := True; // Requires D2006 or newer.
   ListOfStrings.DelimitedText   := Str;
 end;           
-
 
 
 
@@ -213,7 +215,7 @@ end;
 
 
 
-var version:AnsiString='V1.49 Windows';
+var version:AnsiString='V1.51 Windows';
 begin
 
 writeln('SafeCurl '+version);
@@ -377,7 +379,6 @@ list.text:=sOut;
     //écrire la curl Action
    puts(curlAction, 9 );
 
-
    
            //éclater la derniere ligne :
 
@@ -385,7 +386,6 @@ list.text:=sOut;
            SplitSpaces(lastline, lastLineParts);      
 
 //             writeln('lastlineparts.Count=' ,lastLineParts.Count);
-
            if(lastLineParts.Count>=1) then             action_percent:=lastLineParts[0]; //0
            if(lastLineParts.Count>=2) then             action_size :=lastLineParts[1];//1
            if(lastLineParts.Count>=3) then             download_percent :=lastLineParts[2];//2
@@ -416,9 +416,11 @@ list.text:=sOut;
       action_succeed :=true;
   end;
 
-//  writeln('lastline='+lastline+':', Pos('curl: (',lastline) );
+
+
+  //writeln('lastline='+lastline+':', Pos('curl: (',lastline) );
           //Vérification supplémentaire de cas d'erreur
-          if(  ( Pos('curl: (',lastline) >=0)  ) then
+          if(  ( Pos('curl: (',lastline) >=1)  ) then
           begin
                  action_succeed:=false;
           end;       
