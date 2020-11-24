@@ -396,7 +396,7 @@ sCreatedirs:='';
 
 //  writeln('lastline='+lastline+':', Pos('curl: (',lastline) );
           //Vérification supplémentaire de cas d'erreur
-          if(  ( Pos('curl: (',lastline) >0=0)  ) then
+          if(  ( Pos('curl: (',lastline) >=0)  ) then
           begin
                  action_succeed:=false;
           end;
@@ -406,7 +406,7 @@ sCreatedirs:='';
            begin
               //Success 100%
                  textcolor(lightgreen);
-              writeln('OK Success !'+lastline);
+              writeln('OK Success !');
                     if(event_com='--check') then
                     begin
                    //verboz writeln('CurlAction',curlAction);

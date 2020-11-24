@@ -179,7 +179,7 @@ begin
                            writeln(' '+save_updated+', "'+process_arg2+'", size : '+ inttostr( Length(snapshotLines.Text) ) ,3);
 end;
 
-   var version : ansistring='V1.51 linux';
+   var version : ansistring='V1.52 linux';
 
 begin
 
@@ -406,7 +406,7 @@ sCreatedirs:='';
            begin
               //Success 100%
                  textcolor(lightgreen);
-              writeln('OK Success !'+lastline);
+              writeln('OK Success !');
                     if(event_com='--check') then
                     begin
                    //verboz writeln('CurlAction',curlAction);
