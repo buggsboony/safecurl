@@ -1,0 +1,67 @@
+{
+   // See https://go.microsoft.com/fwlink/?LinkId=733558
+   // for the documentation about the tasks.json format
+   "version": "2.0.0",
+   "credentials":"USERNAME:PASSWORD@IP_ADRESS:21"
+   ,"context":"/httpdocs/folder_local"
+ 
+   ,"tasks": [
+    {
+        "label": "PHP",
+        "type": "shell",
+        "command": "PHP",
+        "args": [
+            "${file}"
+        ],
+        "group": "build"
+    },
+    {
+        "label": "ftp_upload",
+        "type": "shell",
+        "command": "safecurl",
+        "args": [
+            "-T",
+            "${file}",
+            "ftp://${config:tasks.credentials}/${config:tasks.context}/${relativeFile}",
+            "--ftp-create-dirs"
+            ,"--check"
+            ,".vscode/metadata/${relativeFile}"
+        ],
+        "group": "build",
+        "problemMatcher": []
+    },
+    {
+        "label": "ftp_download",
+        "type": "shell",
+        "command": "safecurl",
+        "args": [
+            "ftp://${config:tasks.credentials}/${config:tasks.context}/${relativeFile}",
+            "-o",
+            "${file}",
+            "--create-dirs"
+            ,"--check"
+            ,".vscode/metadata/${relativeFile}"
+        ],
+        "group": "build",
+        "problemMatcher": []
+    },
+    {
+        "label": "ftp_list_siblings",
+        "type": "shell",
+        "command": "safecurl",
+        "args": [
+            "ftp://${config:tasks.credentials}/${config:tasks.context}/${relativeFileDirname}/",
+            "-o",
+            "${fileDirname}/",
+            "--create-dirs"
+            ,"--check"
+            ,".vscode/metadata/${relativeFile}"
+        ],
+        "group": "build",
+        "problemMatcher": []
+    }
+
+]
+}
+ 
+

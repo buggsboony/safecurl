@@ -8,9 +8,10 @@
         <Filename Value="safecurl.lpr"/>
         <IsPartOfProject Value="True"/>
         <IsVisibleTab Value="True"/>
-        <TopLine Value="349"/>
-        <CursorPos X="65" Y="365"/>
-        <UsageCount Value="32"/>
+        <TopLine Value="513"/>
+        <CursorPos X="5" Y="546"/>
+        <FoldState Value=" T3jZ061}"/>
+        <UsageCount Value="34"/>
         <Loaded Value="True"/>
       </Unit0>
       <Unit1>
@@ -57,123 +58,123 @@
     <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
         <Filename Value="safecurl.lpr"/>
-        <Caret Line="256" Column="29" TopLine="239"/>
+        <Caret Line="419" Column="9" TopLine="389"/>
       </Position1>
       <Position2>
         <Filename Value="safecurl.lpr"/>
-        <Caret Line="263" Column="31" TopLine="239"/>
+        <Caret Line="388" Column="14" TopLine="377"/>
       </Position2>
       <Position3>
         <Filename Value="safecurl.lpr"/>
-        <Caret Line="247" Column="71" TopLine="239"/>
+        <Caret Line="424" Column="9" TopLine="394"/>
       </Position3>
       <Position4>
         <Filename Value="safecurl.lpr"/>
-        <Caret Line="138" Column="58" TopLine="121"/>
+        <Caret Line="353" Column="57" TopLine="338"/>
       </Position4>
       <Position5>
         <Filename Value="safecurl.lpr"/>
-        <Caret Line="178" Column="20" TopLine="166"/>
+        <Caret Line="172" Column="49" TopLine="167"/>
       </Position5>
       <Position6>
         <Filename Value="safecurl.lpr"/>
-        <Caret Line="271" Column="20" TopLine="243"/>
+        <Caret Line="396" Column="48" TopLine="386"/>
       </Position6>
       <Position7>
         <Filename Value="safecurl.lpr"/>
-        <Caret Line="178" Column="72" TopLine="170"/>
+        <Caret Line="230" Column="81" TopLine="215"/>
       </Position7>
       <Position8>
         <Filename Value="safecurl.lpr"/>
-        <Caret Line="175" Column="46" TopLine="161"/>
+        <Caret Line="365" Column="46" TopLine="349"/>
       </Position8>
       <Position9>
         <Filename Value="safecurl.lpr"/>
-        <Caret Line="170" Column="18" TopLine="164"/>
+        <Caret Line="433" Column="10" TopLine="302"/>
       </Position9>
       <Position10>
         <Filename Value="safecurl.lpr"/>
-        <Caret Line="179" Column="69" TopLine="164"/>
+        <Caret Line="201" Column="20" TopLine="195"/>
       </Position10>
       <Position11>
         <Filename Value="safecurl.lpr"/>
-        <Caret Line="120" Column="29" TopLine="101"/>
+        <Caret Line="7" Column="18" TopLine="411"/>
       </Position11>
       <Position12>
         <Filename Value="safecurl.lpr"/>
-        <Caret Line="179" Column="73" TopLine="158"/>
+        <Caret Line="186" Column="45" TopLine="137"/>
       </Position12>
       <Position13>
         <Filename Value="safecurl.lpr"/>
-        <Caret Line="178" Column="48" TopLine="155"/>
+        <Caret Line="203" Column="21" TopLine="188"/>
       </Position13>
       <Position14>
         <Filename Value="safecurl.lpr"/>
-        <Caret Line="175" Column="15" TopLine="158"/>
+        <Caret Line="7" Column="42"/>
       </Position14>
       <Position15>
         <Filename Value="safecurl.lpr"/>
-        <Caret Line="179" Column="27" TopLine="162"/>
+        <Caret Line="318" Column="30" TopLine="310"/>
       </Position15>
       <Position16>
         <Filename Value="safecurl.lpr"/>
-        <Caret Line="180" Column="30" TopLine="163"/>
+        <Caret Line="304" Column="31" TopLine="290"/>
       </Position16>
       <Position17>
         <Filename Value="safecurl.lpr"/>
-        <Caret Line="191" Column="16" TopLine="166"/>
+        <Caret Line="484" Column="20" TopLine="463"/>
       </Position17>
       <Position18>
         <Filename Value="safecurl.lpr"/>
-        <Caret Line="295" Column="62" TopLine="283"/>
+        <Caret Line="3" Column="36"/>
       </Position18>
       <Position19>
         <Filename Value="safecurl.lpr"/>
-        <Caret Line="73" Column="45" TopLine="68"/>
+        <Caret Line="484" Column="53" TopLine="463"/>
       </Position19>
       <Position20>
         <Filename Value="safecurl.lpr"/>
-        <Caret Line="106" Column="37" TopLine="98"/>
+        <Caret Line="556" Column="33" TopLine="536"/>
       </Position20>
       <Position21>
         <Filename Value="safecurl.lpr"/>
-        <Caret Line="391" Column="40" TopLine="349"/>
+        <Caret Line="554" Column="21" TopLine="540"/>
       </Position21>
       <Position22>
         <Filename Value="safecurl.lpr"/>
-        <Caret Line="388" TopLine="369"/>
+        <Caret Line="489" Column="43" TopLine="463"/>
       </Position22>
       <Position23>
         <Filename Value="safecurl.lpr"/>
-        <Caret Line="419" Column="9" TopLine="389"/>
+        <Caret Line="14" Column="11" TopLine="411"/>
       </Position23>
       <Position24>
         <Filename Value="safecurl.lpr"/>
-        <Caret Line="388" Column="14" TopLine="377"/>
+        <Caret Line="136" Column="16" TopLine="77"/>
       </Position24>
       <Position25>
         <Filename Value="safecurl.lpr"/>
-        <Caret Line="424" Column="9" TopLine="394"/>
+        <Caret Line="554" Column="18" TopLine="527"/>
       </Position25>
       <Position26>
         <Filename Value="safecurl.lpr"/>
-        <Caret Line="353" Column="57" TopLine="338"/>
+        <Caret Line="558" Column="34" TopLine="479"/>
       </Position26>
       <Position27>
         <Filename Value="safecurl.lpr"/>
-        <Caret Line="172" Column="49" TopLine="167"/>
+        <Caret Line="67" Column="70" TopLine="50"/>
       </Position27>
       <Position28>
         <Filename Value="safecurl.lpr"/>
-        <Caret Line="396" Column="48" TopLine="386"/>
+        <Caret Line="479" Column="51" TopLine="465"/>
       </Position28>
       <Position29>
         <Filename Value="safecurl.lpr"/>
-        <Caret Line="230" Column="81" TopLine="215"/>
+        <Caret Line="185" Column="51" TopLine="411"/>
       </Position29>
       <Position30>
         <Filename Value="safecurl.lpr"/>
-        <Caret Line="365" Column="46" TopLine="349"/>
+        <Caret Line="233" Column="28" TopLine="218"/>
       </Position30>
     </JumpHistory>
     <RunParams>

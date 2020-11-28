@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
   <Compiler Value="/usr/bin/fpc" Date="1601933129"/>
-  <Params Value=" -MObjFPC -Scghi -Cg -O1 -g -gl -l -vewnhibq -Fi/home/boony/Documents/srcs/safecurl/linux/safecurl/lib/x86_64-linux -Fu/home/boony/Documents/srcs/safecurl/linux/safecurl/ -FU/home/boony/Documents/srcs/safecurl/linux/safecurl/lib/x86_64-linux/ -FE/home/boony/Documents/srcs/safecurl/linux/safecurl/ -o/home/boony/Documents/srcs/safecurl/linux/safecurl/safecurl safecurl.lpr"/>
+  <Params Value=" -MObjFPC -Scghi -Cg -O1 -g -gl -l -vewnhibq -Fi/home/boony/Documents/dev/src_compile/safecurl/linux/safecurl/lib/x86_64-linux -Fu/home/boony/Documents/dev/src_compile/safecurl/linux/safecurl/ -FU/home/boony/Documents/dev/src_compile/safecurl/linux/safecurl/lib/x86_64-linux/ -FE/home/boony/Documents/dev/src_compile/safecurl/linux/safecurl/ -o/home/boony/Documents/dev/src_compile/safecurl/linux/safecurl/safecurl safecurl.lpr"/>
 </CONFIG>

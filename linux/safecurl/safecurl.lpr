@@ -1,9 +1,11 @@
 program safecurl;
 
-uses crt,Process, sysutils,  classes, base64;
+uses crt,Process, sysutils,StrUtils,  classes, base64;
 
 
-
+   Type
+     TCallbackStr = function(ind:Integer):AnsiString;
+     TCallbackCount = function:Integer;
 
 var
   AProcess: TProcess;
@@ -57,14 +59,14 @@ begin
    until n <= 0;
    if BytesRead > 0 then WriteLn;
    M.SetSize(BytesRead);
-//   WriteLn('-- executed --');
+// WriteLn('-- executed --');
 
    S := TStringList.Create;
    S.LoadFromStream(M);
   // WriteLn('-- linecount = ', S.Count, ' --');
    for n := 0 to S.Count - 1 do
    begin
-  //  WriteLn(S[n]);
+//  WriteLn(S[n]);
    end;
 
 
@@ -179,11 +181,16 @@ begin
                            writeln(' '+save_updated+', "'+process_arg2+'", size : '+ inttostr( Length(snapshotLines.Text) ) ,3);
 end;
 
-   var version : ansistring='V1.53 linux';
+   var version : ansistring='V2.03 linux';
+                               aStr:Ansistring;
 
+
+
+
+
+procedure safecurl(paramcount:TCallbackCount; paramstr:TCallbackStr);
 begin
-
-   //redirect:='2>/home/boony/test2.txt'          ;
+               //redirect:='2>/home/boony/test2.txt'          ;
    // redirect:='2>&1'          ;
     redirect:='';
 sFile:='';
@@ -265,7 +272,7 @@ sCreatedirs:='';
                    if( not FileExists(realSnapFile) ) then
                    begin
                      canPush := false;
-                     textcolor(red); writeln('Comparison file does not exists !');  
+                     textcolor(red); writeln('Comparison file does not exists !');
                        writeln(' Stopped !');
                        textcolor(LightGray);
                        halt;
@@ -273,7 +280,7 @@ sCreatedirs:='';
                    begin
                     snapshotLines.LoadFromFile(realSnapFile);
                    end;
-                   
+
                    if( snapshotLines.Text = tempStrings.Text) then
                    begin
                        canPush := true;
@@ -313,7 +320,7 @@ sCreatedirs:='';
 
 
 
-    end else if paramcount>1 then                      ////////////////////////////////////  Download  ----------------------
+    end else if paramcount() >1 then                      ////////////////////////////////////  Download  ----------------------
     begin
         //Download
           curlAct:='Download';
@@ -431,5 +438,135 @@ sCreatedirs:='';
            textcolor(LightGray);
 
      end;
+
+
+end; //safecurl
+
+
+begin
+
+redirect:='';
+sFile:='';
+sFtpFile:='';
+sCreatedirs:='';
+curlExe := 'curl';
+
+    if( paramcount() > 1)then
+    begin
+        action:=paramstr(1);
+    end;
+
+    writeln(action,'action was');
+
+
+
+    if(action='-T')then     //Check if Transfert Or Download for entier directory
+    begin
+     sFile:=paramstr(2);          // writeln('sFile00=',sFile);
+       sFtpFile:=paramstr(3);
+       sCreatedirs:=paramstr(4);         //writeln('sFtpFile=',sFtpFile);
+             event_com:=paramstr(5); //--check
+       curlAction:=curlAction +' file '+sFile;
+    end else if paramcount() >1 then                      ////////////////////////////////////  Download  ----------------------
+    begin
+        //Download
+          curlAct:='Download';
+          curlAction:='Download';
+       sFtpFile:=paramstr(1);
+        action:=paramstr(2);
+       sFile:=paramstr(3);
+       sCreatedirs:=paramstr(4);
+       writeln('sFtpFile=',sFtpFile);
+       if AnsiEndsStr('/',sFtpFile) then
+           begin     //Is a directory ! just list !
+              curlAct:='List';
+              curlAction:='List';
+              curlAction:=curlAction + ' -> '+sFile;
+               event_com:=paramstr(5);
+
+            command :=curlExe+' --list-only "'+sFtpFile+'" ';
+            //writeln('commande:',command);
+
+            RunCommand(command, aStr);   //Run command only works to get file lists
+            RunProcessStdErr(command, list);  //necessary to get transaction results
+
+
+           if(list.count>0)then
+           begin
+                writeln('listcount:', list.count);
+               textcolor(LightGray);
+                writeln('Output :'#13#10);
+
+                textColor(blue); writeln(list.Text);
+                 lastline:= list[list.count-1];
+
+                 //execution time
+                 textcolor(lightGray);
+                 Writeln ('Execution time : ', FormatDateTime('YYYY-MM-DD hh:nn:ss',now) );
+                 //écrire la curl Action
+                 textcolor(Cyan);  writeln(curlAction);  textcolor(LightGray);
+
+                 //éclater la derniere ligne :
+
+                 lastLineParts:= TStringList.create;
+                 SplitSpaces(lastline, lastLineParts);
+
+
+                 // writeln('lastlineparts.Count=' ,lastLineParts.Count);
+
+
+                 action_succeed  :=false;
+
+
+
+                //writeln('search size',search_size);          writeln('search perce', action_percent);
+                  if( pos('100 ', lastline )=1 )then
+                  begin
+                      action_succeed :=true;
+                  end;
+
+
+           // writeln('lastline='+lastline+':', Pos('curl: (',lastline) );
+              //Vérification supplémentaire de cas d'erreur
+          if(  ( Pos('curl: (',lastline) >=1)  ) then
+          begin
+                 action_succeed:=false;
+          end;
+
+
+           if( action_succeed )then
+           begin
+              //Success 100%
+
+           //Print file list data
+                 writeln(aStr);
+
+
+                 textcolor(lightgreen);
+                      writeln('CurlAction',curlAction);
+
+                 writeln('OK Success !');
+
+
+           end else begin
+             textcolor(lightred);
+              writeln('KO Failed');
+           end;
+
+
+           textcolor(LightGray);
+
+           end;
+
+
+
+         end;
+    end;
+
+
+
+
+      //Do normal job
+   //safecurl(@paramcount, @paramstr );
 end.
 
