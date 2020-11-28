@@ -362,6 +362,7 @@ sCreatedirs:='';
            SplitSpaces(lastline, lastLineParts);
 
 
+
 //             writeln('lastlineparts.Count=' ,lastLineParts.Count);
 
            if(lastLineParts.Count>=1) then             action_percent:=lastLineParts[0]; //0

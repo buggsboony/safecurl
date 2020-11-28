@@ -179,7 +179,7 @@ begin
                            writeln(' '+save_updated+', "'+process_arg2+'", size : '+ inttostr( Length(snapshotLines.Text) ) ,3);
 end;
 
-   var version : ansistring='V1.52 linux';
+   var version : ansistring='V1.53 linux';
 
 begin
 
