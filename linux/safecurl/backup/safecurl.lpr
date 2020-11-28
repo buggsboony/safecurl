@@ -485,7 +485,7 @@ curlExe := 'curl';
                event_com:=paramstr(5);
 
             command :=curlExe+' --list-only "'+sFtpFile+'" ';
-            writeln('commande:',command);
+            //writeln('commande:',command);
 
             RunCommand(command, aStr);   //Run command only works to get file lists
             RunProcessStdErr(command, list);  //necessary to get transaction results

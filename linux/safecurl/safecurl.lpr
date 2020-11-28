@@ -488,7 +488,10 @@ curlExe := 'curl';
             //writeln('commande:',command);
 
             RunCommand(command, aStr);   //Run command only works to get file lists
-            RunProcessStdErr(command, list);  //necessary to get transaction results
+
+            writeln(aStr);
+            halt;
+            //RunProcessStdErr(command, list);  //necessary to get transaction results
 
 
            if(list.count>0)then
@@ -514,10 +517,7 @@ curlExe := 'curl';
 
                  // writeln('lastlineparts.Count=' ,lastLineParts.Count);
 
-
                  action_succeed  :=false;
-
-
 
                 //writeln('search size',search_size);          writeln('search perce', action_percent);
                   if( pos('100 ', lastline )=1 )then
@@ -541,12 +541,9 @@ curlExe := 'curl';
            //Print file list data
                  writeln(aStr);
 
-
                  textcolor(lightgreen);
                       writeln('CurlAction',curlAction);
-
                  writeln('OK Success !');
-
 
            end else begin
              textcolor(lightred);
@@ -567,6 +564,6 @@ curlExe := 'curl';
 
 
       //Do normal job
-   //safecurl(@paramcount, @paramstr );
+   safecurl(@paramcount, @paramstr );
 end.
 
