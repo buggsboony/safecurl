@@ -335,7 +335,7 @@ sCreatedirs:='';
                event_com:=paramstr(5);
 
         command :=curlExe+' "'+sFtpFile+'" '+action+' "'+sFile+'" '+sCreatedirs;
-        writeln('commande:',command);
+        //writeln('commande:',command);
         RunProcessStdErr(command, list);
     end;
 
@@ -352,7 +352,7 @@ sCreatedirs:='';
      begin
             // writeln('listcount:', list.count);
          textcolor(LightGray);
-          writeln('Output :'#13#10);
+         //verboz // writeln('Output :'#13#10);
 
           textColor(blue); writeln(list.Text);
            lastline:= list[list.count-1];
@@ -456,7 +456,7 @@ curlExe := 'curl';
         action:=paramstr(1);
     end;
 
-    writeln(action,'action was');
+//verboz    writeln(action,'action was');
 
 
 
@@ -476,7 +476,7 @@ curlExe := 'curl';
         action:=paramstr(2);
        sFile:=paramstr(3);
        sCreatedirs:=paramstr(4);
-       writeln('sFtpFile=',sFtpFile);
+       //writeln('sFtpFile=',sFtpFile);
        if AnsiEndsStr('/',sFtpFile) then
            begin     //Is a directory ! just list !
               curlAct:='List';
@@ -496,7 +496,7 @@ curlExe := 'curl';
 
            if(list.count>0)then
            begin
-                writeln('listcount:', list.count);
+               //debug writeln('listcount:', list.count);
                textcolor(LightGray);
                 writeln('Output :'#13#10);
 
