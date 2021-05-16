@@ -10,6 +10,8 @@ uses crt,Process, sysutils,StrUtils,  classes, base64;
 var
   AProcess: TProcess;
   AStringList: TStringList;
+  APP_NAME : AnsiString='SafeCurl';
+  onEndFilename,configPath:AnsiString;
 
 procedure RunProcessStdErr(command :Ansistring; out  S: TStringList  );
 var
@@ -135,6 +137,14 @@ end;
      bRes, canPush,res:boolean;
     iRes, iloop:integer;
 
+
+    //PRocess on end
+    onEndRan:boolean;
+    hprocess:TProcess;
+    OutputLines: TStringList;
+
+
+
     action_percent: AnsiString;//0
    action_size :AnsiString;//1
    download_percent  :AnsiString;//2
@@ -181,16 +191,78 @@ begin
                            writeln(' '+save_updated+', "'+process_arg2+'", size : '+ inttostr( Length(snapshotLines.Text) ) ,3);
 end;
 
-   var version : ansistring='V2.03 linux';
+   var version : ansistring='V2.12 linux';
                                aStr:Ansistring;
 
 
 
 
+procedure waitForOnEnd;
+begin
+   // Now you can process the process output (standard output and standard error), eg:
+  if( onEndRan)then  //Wait for Process on End to stop
+  begin
+
+    OutputLines.Add('stdout:');
+    OutputLines.LoadFromStream(hprocess.Output);
+    OutputLines.Add('stderr:');
+    OutputLines.LoadFromStream(hProcess.Stderr);
+    // Show output on screen:
+    writeln(OutputLines.Text);
+    // Clean up to avoid memory leaks:
+    hProcess.Free;
+    OutputLines.Free;
+  end;
+end;
+
+procedure prepareConfig;
+var homeDir:AnsiString;
+var stringList:TstringList;
+begin
+     homeDir:=  GetUserDir(); {  /home/boony/   With slash }
+     configPath:=homedir+'.config'+pathDelim+APP_NAME; //Linux config folder
+     ForceDirectories(configPath);
+
+     //Create default onEndScript.
+     onEndFilename:=configPath+PathDelim+'on_end.sh';
+     if( not FileExists( onEndFilename ) )then
+     begin
+       stringList:=TStringList.create;
+       stringList.append('#!/bin/bash');
+       stringList.append('# This script will run on safecurl end, args : success: True or False, curlAct: Download or Upload');
+       writeln('Attempting to create onEnd script : '''+onEndFilename+'''');
+       stringList.SaveToFile(onEndFilename);
+     end;
+end;
+
+//Async onEnd Execution
+procedure onEnd(success:boolean; curlAct:AnsiString);
+begin
+   onEndRan:=true;
+   textcolor(LightGray);
+   writeln('OnEnd: '''+onEndFilename+'''');
+  hProcess := TProcess.Create(nil);
+  // On Linux/Unix/FreeBSD/macOS, we need specify full path to our executable:
+  hProcess.Executable := '/bin/bash';
+  // Now we add all the parameters on the command line:
+// hprocess.Parameters.Add('-c'); hprocess.Parameters.add('kate');
+   hprocess.Parameters.add(onEndFilename);
+   hprocess.Parameters.add(BoolToStr(success,  TRUE) );
+   hprocess.Parameters.add(curlAct);
+  // Run asynchronously (wait for process to exit) and use pipes so we can read the output pipe
+  hProcess.Options := hProcess.Options + [ poWaitOnExit, poUsePipes];//Run Async + no need to wait
+  // Now run:
+  hProcess.Execute;
+end;
+
 
 procedure safecurl(paramcount:TCallbackCount; paramstr:TCallbackStr);
 begin
-               //redirect:='2>/home/boony/test2.txt'          ;
+
+    //OnEnd PReparation :
+    onEndRan:=false;
+
+  //redirect:='2>/home/boony/test2.txt'          ;
    // redirect:='2>&1'          ;
     redirect:='';
 sFile:='';
@@ -414,6 +486,10 @@ sCreatedirs:='';
               //Success 100%
                  textcolor(lightgreen);
               writeln('OK Success !');
+
+                 //----------- Exécuter onEnd async:       +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+                 onEnd(action_succeed,curlAct);
+
                     if(event_com='--check') then
                     begin
                    //verboz writeln('CurlAction',curlAction);
@@ -423,27 +499,40 @@ sCreatedirs:='';
                         end else
                         if(curlAct ='Upload') then
                         begin
-
                           saveSnapShotFile(curlAct);
-
                         end;
-
                      end;
            end else begin
              textcolor(lightred);
-              writeln('KO Failed');
+              writeln('KO Failed !');
+
+                 //----------- Exécuter onEnd async:
+                 onEnd(action_succeed,curlAct);
            end;
-
-
            textcolor(LightGray);
+
 
      end;
 
 
-end; //safecurl
+         
+
+  // hProcess should have now run the external executable (because we use poWaitOnExit).
+  // Now you can process the process output (standard output and standard error), eg:
+  //Wait for Process on End to stop
+    //waitForOnEnd();
 
 
+
+end; //safecurl function
+
+
+
+
+
+//--------------------------------------------  MAIN ENTRY POINT ------------------------------
 begin
+        prepareConfig; //Create Config path and onEndScript
 
 redirect:='';
 sFile:='';
