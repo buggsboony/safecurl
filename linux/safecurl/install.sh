@@ -11,12 +11,13 @@ echo "Set executable..."
 chmod +x $what$extension
 #echo "lien symbolique vers usr bin"
 sudo ln -s "$PWD/$what$extension" /usr/bin/$what
+echo "done."
 
 cd ../../safepush
-echo "Installing safepush, ($path2)\n Set executable..."
-chmod +x $path2/$what2$extension2
+echo "Installing safepush, \n Set executable..."
+chmod +x $what2$extension2
 #echo "lien symbolique vers usr bin"
-sudo ln -s "$path2/$what2$extension2" /usr/bin/$what2
+sudo ln -s "$PWD/$what2$extension2" /usr/bin/$what2
 echo "done."
 
 #cd back to where we was
