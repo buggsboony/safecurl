@@ -5,8 +5,9 @@ $APP_NAME="SafePush Tool";
 $VERSION="1.03";
 
 
-$_DEF ="\e[39m";
-$_YELL="\033[0;33m";
+//$_DEF ="\e[39m";
+$_DEF = "\033[0m";
+$_ORAN="\033[0;33m";
 $_RED ="\033[0;31m";
 $_GREEN="\033[0;32m"; #echo "$_LRED'$tasks' does not exists.$_DEF\n";
 $_LGREEN="\033[1;32m";
@@ -171,8 +172,124 @@ if($tjson===null)
 //var_dump($tasks_json ,$tjson);
 //var_dump( $tjson->credentials );
 
-scan(".");
+//scan(".");
    
 
 
+//CURLOPT_FILETIME
+/*
+
+function http_response($url, $status = null, $wait = 3)
+{
+        $time = microtime(true);
+        $expire = $time + $wait;
+
+        // we fork the process so we don't have to wait for a timeout
+        $pid = pcntl_fork();
+        if ($pid == -1) {
+            die('could not fork');
+        } else if ($pid) {
+            // we are the parent
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, $url);
+            curl_setopt($ch, CURLOPT_HEADER, TRUE);
+            curl_setopt($ch, CURLOPT_NOBODY, TRUE); // remove body
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+            $head = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+           
+            if(!$head)
+            {
+                return FALSE;
+            }
+           
+            if($status === null)
+            {
+                if($httpCode < 400)
+                {
+                    return TRUE;
+                }
+                else
+                {
+                    return FALSE;
+                }
+            }
+            elseif($status == $httpCode)
+            {
+                return TRUE;
+            }
+           
+            return FALSE;
+            pcntl_wait($status); //Protect against Zombie children
+        } else {
+            // we are the child
+            while(microtime(true) < $expire)
+            {
+            sleep(0.5);
+            }
+            return FALSE;
+        }
+    }
+*/
+ 
+
+/// SafePush Tool Version 1.03  2021-06-05 19:29:55
+// Exemple de résultat
+// string(91) "Last-Modified: Sat, 05 Jun 2021 22:58:55 GMT
+// Content-Length: 16944
+// Accept-ranges: bytes
+function curlRequestFileDate($url)
+{
+    $curl = curl_init();
+    curl_setopt($curl, CURLOPT_URL,$url);
+ 
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($curl, CURLOPT_NOBODY, 1);
+
+    curl_setopt($curl, CURLOPT_FILETIME, TRUE );
+
+    $result = curl_exec ($curl);
+    var_dump($result);
+    $time = curl_getinfo($curl, CURLINFO_FILETIME);
+    print date('d/m/y H:i:s', $time);
+
+    curl_close ($curl);
+}
+function curlRequest($url)
+{ 
+        // Initialisez une session CURL.
+        $ch = curl_init();          
+        // Récupérer le contenu de la page
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); 
+        
+        //Saisir l'URL et la transmettre à la variable.
+        curl_setopt($ch, CURLOPT_URL, $url); 
+        //récupérer le datage distant du fichier
+        //curl_setopt($ch, CURLOPT_FILETIME, true);
+
+        //Désactiver la vérification du certificat puisque server utilise HTTPS
+        //curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+
+        //Exécutez la requête 
+        $result = curl_exec($ch); 
+        //Afficher le résultat
+        return $result;  
+}//curlRequest
+
+
+$url="ftp://adminev02:Qwy_613m@151.236.37.12:21//httpdocs/stationpilotage/";
+ 
+$content = curlRequest($url);
+$lines = explode("\n",$content);
+
+foreach($lines as $line_untrimmed):
+    $line =  trim($line_untrimmed);   //-rw-r--r--   1 adminev02 psacln      16944 Jun  5 18:58 scripts.js
+    if( $line )
+    {
+        $parts = preg_split('/\s+/', $line);
+        echo "parts:";var_dump($parts);
+    }
+endforeach;
+         
 ?>

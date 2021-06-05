@@ -16,10 +16,10 @@ if [ $success == "True" ];then
    #echo "succedded $curlAct">/home/boony/safecurl.txt
    #aplay "/usr/lib/libreoffice/share/gallery/sounds/untie.wav";
    #aplay "/usr/lib/libreoffice/share/gallery/sounds/left.wav";
-   notify-send "$title - $curlAct" "SUCCEEDED !" -i "$iconok" --expire-time 500;
+   notify-send "$title - $curlAct" "SUCCEEDED !" -i "$iconok" --expire-time 5000;
 else
    #echo "operation $curlAct failed">/home/boony/safecurl.txt
-   notify-send "$title - $curlAct" "FAILED !" --icon "$iconfail" --expire-time 50000
+   notify-send "$title - $curlAct" "FAILED !" --icon "$iconfail" --expire-time 5000
       aplay "/usr/lib/libreoffice/share/gallery/sounds/left.wav"
 fi
 
