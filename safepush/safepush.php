@@ -22,9 +22,9 @@ $_LCYAN="\033[1;36m";
 
 
 date_default_timezone_set($tz="America/Martinique");
-$excludes=array();
+$excludes=array("./.vscode/metadata");
 $minutesAgo=720; // 720minutes => 12h
-
+$VERBOSE = false;
 
 //récupérer les arguments :    $>    safepush -x "pattern to exclude"  -x "pattern2 to exclude" -t minutesAgo
 for($i=0; $i<count($argv); $i++)
@@ -39,11 +39,12 @@ for($i=0; $i<count($argv); $i++)
         $exclude= ($argv[$i+1] );
         $excludes[]=$exclude;
     }    
+    if(  ($arg === "-v")  )
+    {
+        $VERBOSE=true;
+    }    
 }
 //var_dump( $argv); die("arg pose");
-echo "minutesAgo: ";var_dump($minutesAgo);
-echo "exclusions: "; var_dump($excludes);
- die("arg pose");
 
 
 
@@ -52,6 +53,16 @@ $dtMinsAgo= clone $dtNow;
 $ts = $dtNow->getTimestamp();
 $dtMinsAgo->setTimestamp($ts-($minutesAgo*60) );
  
+
+
+echo "file modification time : $_ORAN$minutesAgo $_DEF minutes ago\n";
+echo "Search files mdate after : ". $dtMinsAgo->format("Y-m-d H:i:s") ."\nDate FR:\n$_LGREEN". $dtMinsAgo->format("d/m/Y H:i:s") ."$_DEF\n";
+if(count($excludes)>0) 
+{
+    echo "exclusion patterns : \n$_ORAN".implode("\n",$excludes)." $_DEF\n";    
+}else{
+    echo "$_ORAN 0$DEF exclusion patterns\n";
+}
 
 
 /**
@@ -117,13 +128,34 @@ $local_list=array();
 
 function visi_job($value)
 {
-    global $local_list;
-       $modif_time = filemtime($value);
-       //var_dump($value, date("F d Y h:i:s",$modif_time) );
+    global $local_list,$dtMinsAgo, $excludes, $VERBOSE;
+       $modif_time_ts = filemtime($value);
+       //var_dump($value, date("F d Y H:i:s",$modif_time_ts) );     
+    // $dtw =new DateTime( ); $dtw->setTimestamp($modif_time_ts);
+    // echo "modiftime=";var_dump($modif_time_ts  , $dtw->format("Y-m-d H:i:s")  ); exit;               
+       $filemtime = date("Y-m-d H:i:s",$modif_time_ts);
+       $fullname=$value;  
        
-       $filemtime = date("Y-m-d",$modif_time);
-       $fullname=$value;
-       $local_list[]=compact("filemtime","fullname");
+       $allowed=true;
+       foreach( $excludes as $pattern):
+            $found = strpos($fullname,$pattern);
+            if($found===false)
+            {
+                $allowed=true;
+            }else
+            {
+                if($VERBOSE) echo "EXCLUDE : [$fullname]\n";
+            }
+       endforeach;
+       if($allowed)
+       {
+            if( $modif_time_ts > $dtMinsAgo->getTimestamp() )
+            {
+                   if($VERBOSE)  echo "ADD : '$fullname' [$filemtime]\n";
+                    $local_list[]=compact("filemtime","fullname");
+            }
+       }//endif allowed
+    
       //echo $value."\n";
 }//visi_job
 
@@ -168,11 +200,11 @@ function dirToArray($dir, $fn) {
  
 function scan($dir)
 {
-   global $visi_latest_time;
-   $results =  dirToArray($dir,"visi_job");
-
-   
+   global $local_list;
+   $local_list=array();//reset list
+   $results =  dirToArray($dir,"visi_job");   
    //var_dump( $results );
+  // echo "local list: ";var_dump( $local_list );
 }//scan
 
 
