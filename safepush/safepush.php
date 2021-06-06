@@ -21,6 +21,39 @@ $_CYAN="\033[0;36m";
 $_LCYAN="\033[1;36m";
 
 
+date_default_timezone_set($tz="America/Martinique");
+$excludes=array();
+$minutesAgo=720; // 720minutes => 12h
+
+
+//récupérer les arguments :    $>    safepush -x "pattern to exclude"  -x "pattern2 to exclude" -t minutesAgo
+for($i=0; $i<count($argv); $i++)
+{
+    $arg = $argv[$i];
+    if( ($arg === "-t" ) || ( $arg === "-m" ) || ( $arg === "--minutes" )  || ( $arg === "--min" ) )
+    {
+        $minutesAgo=intval($argv[$i+1] );
+    }   
+    if(  ($arg === "-x") || ($arg === "--exclude")  )
+    {
+        $exclude= ($argv[$i+1] );
+        $excludes[]=$exclude;
+    }    
+}
+//var_dump( $argv); die("arg pose");
+echo "minutesAgo: ";var_dump($minutesAgo);
+echo "exclusions: "; var_dump($excludes);
+ die("arg pose");
+
+
+
+$dtNow = new DateTime();
+$dtMinsAgo= clone $dtNow;
+$ts = $dtNow->getTimestamp();
+$dtMinsAgo->setTimestamp($ts-($minutesAgo*60) );
+ 
+
+
 /**
  * Clean comments of json content and decode it with json_decode().
  * Work like the original php json_decode() function with the same params
@@ -80,10 +113,17 @@ function getLastJsonError()
 
 $ignoredPaths[]="/home/boony/Documents/dev/web"; //path to ignore
 //visi_job functionn
+$local_list=array(); 
+
 function visi_job($value)
 {
+    global $local_list;
        $modif_time = filemtime($value);
-       var_dump($value, date("F d Y h:i:s",$modif_time) );
+       //var_dump($value, date("F d Y h:i:s",$modif_time) );
+       
+       $filemtime = date("Y-m-d",$modif_time);
+       $fullname=$value;
+       $local_list[]=compact("filemtime","fullname");
       //echo $value."\n";
 }//visi_job
 
@@ -148,7 +188,7 @@ function scan($dir)
 
 
 //Greetings --------------------
-echo "$_YELL $APP_NAME"." Version $VERSION $_DEF\n";
+echo "$_YELL $APP_NAME"." Version $VERSION $_DEF - TZ: $tz\n";
 
 $tasks=".vscode/tasks.json";
 
@@ -169,69 +209,7 @@ if($tjson===null)
     die("Sorry...\n");
 }
 
-//var_dump($tasks_json ,$tjson);
-//var_dump( $tjson->credentials );
 
-//scan(".");
-   
-
-
-//CURLOPT_FILETIME
-/*
-
-function http_response($url, $status = null, $wait = 3)
-{
-        $time = microtime(true);
-        $expire = $time + $wait;
-
-        // we fork the process so we don't have to wait for a timeout
-        $pid = pcntl_fork();
-        if ($pid == -1) {
-            die('could not fork');
-        } else if ($pid) {
-            // we are the parent
-            $ch = curl_init();
-            curl_setopt($ch, CURLOPT_URL, $url);
-            curl_setopt($ch, CURLOPT_HEADER, TRUE);
-            curl_setopt($ch, CURLOPT_NOBODY, TRUE); // remove body
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
-            $head = curl_exec($ch);
-            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            curl_close($ch);
-           
-            if(!$head)
-            {
-                return FALSE;
-            }
-           
-            if($status === null)
-            {
-                if($httpCode < 400)
-                {
-                    return TRUE;
-                }
-                else
-                {
-                    return FALSE;
-                }
-            }
-            elseif($status == $httpCode)
-            {
-                return TRUE;
-            }
-           
-            return FALSE;
-            pcntl_wait($status); //Protect against Zombie children
-        } else {
-            // we are the child
-            while(microtime(true) < $expire)
-            {
-            sleep(0.5);
-            }
-            return FALSE;
-        }
-    }
-*/
  
 
 /// SafePush Tool Version 1.03  2021-06-05 19:29:55
@@ -256,6 +234,8 @@ function curlRequestFileDate($url)
 
     curl_close ($curl);
 }
+
+
 function curlRequest($url)
 { 
         // Initialisez une session CURL.
@@ -278,18 +258,38 @@ function curlRequest($url)
 }//curlRequest
 
 
-$url="ftp://adminev02:Qwy_613m@151.236.37.12:21//httpdocs/stationpilotage/";
- 
-$content = curlRequest($url);
-$lines = explode("\n",$content);
 
-foreach($lines as $line_untrimmed):
-    $line =  trim($line_untrimmed);   //-rw-r--r--   1 adminev02 psacln      16944 Jun  5 18:58 scripts.js
-    if( $line )
-    {
-        $parts = preg_split('/\s+/', $line);
-        echo "parts:";var_dump($parts);
-    }
-endforeach;
+
+//var_dump($tasks_json ,$tjson);
+//var_dump( $tjson->credentials );
+
+scan(".");
+   
+
+
+
+
+
+
+// $sepDate = array("  "," ");//Séparateur de date dans la chaine exemple: Jun  5 18:58 scripts.js
+// $url="ftp://adminev02:Qwy_613m@151.236.37.12:21//httpdocs/stationpilotage/";
+// $content = curlRequest($url);
+// $lines = explode("\n",$content);
+
+// foreach($lines as $line_untrimmed):
+//     $line =  trim($line_untrimmed);   //-rw-r--r--   1 adminev02 psacln      16944 Jun  5 18:58 scripts.js
+//     if( $line )
+//     {
+//         $parts = preg_split('/\s+/', $line);
+//         //echo "parts:";var_dump($parts);
+//         //echo "Line: [$line]";
+//         $filesize=$parts[4];
+//         $filedate=$parts[5].$sepDate[0].$parts[6].$sepDate[1].$parts[7];
+//         //séparer gauche et droite, pour avoir le nom du fichier
+//         $pair = explode($filedate,$line);
+//         if(count($pair)>1) $filename=trim($pair[1]);else echo "Prob avec ligne:[$line]\n";
+//         //var_dump($filesize,$filedate,$filename);
+//     }
+// endforeach;
          
 ?>
