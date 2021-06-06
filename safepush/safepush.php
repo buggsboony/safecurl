@@ -59,9 +59,9 @@ echo "file modification time : $_ORAN$minutesAgo $_DEF minutes ago\n";
 echo "Search files mdate after : ". $dtMinsAgo->format("Y-m-d H:i:s") ."\nDate FR:\n$_LGREEN". $dtMinsAgo->format("d/m/Y H:i:s") ."$_DEF\n";
 if(count($excludes)>0) 
 {
-    echo "exclusion patterns : \n$_ORAN".implode("\n",$excludes)." $_DEF\n";    
+    echo "Exclusion patterns : \n$_ORAN".implode("\n",$excludes)." $_DEF\n";    
 }else{
-    echo "$_ORAN 0$DEF exclusion patterns\n";
+    echo "$_ORAN 0$DEF exclusion pattern\n";
 }
 
 
@@ -133,7 +133,9 @@ function visi_job($value)
        //var_dump($value, date("F d Y H:i:s",$modif_time_ts) );     
     // $dtw =new DateTime( ); $dtw->setTimestamp($modif_time_ts);
     // echo "modiftime=";var_dump($modif_time_ts  , $dtw->format("Y-m-d H:i:s")  ); exit;               
+       
        $filemtime = date("Y-m-d H:i:s",$modif_time_ts);
+       $mtime = $modif_time_ts;
        $fullname=$value;  
        
        $allowed=true;
@@ -152,7 +154,7 @@ function visi_job($value)
             if( $modif_time_ts > $dtMinsAgo->getTimestamp() )
             {
                    if($VERBOSE)  echo "ADD : '$fullname' [$filemtime]\n";
-                    $local_list[]=compact("filemtime","fullname");
+                   $local_list[]=compact("filemtime","fullname","mtime");
             }
        }//endif allowed
     
@@ -200,12 +202,39 @@ function dirToArray($dir, $fn) {
  
 function scan($dir)
 {
-   global $local_list;
+   global $local_list, $_ORAN, $_DEF;
    $local_list=array();//reset list
    $results =  dirToArray($dir,"visi_job");   
    //var_dump( $results );
-  // echo "local list: ";var_dump( $local_list );
+   $cnt = count($local_list);
+   echo " $cnt fichier(s) trouvé(s).\n";
+      /*
+       ["filemtime"]=>
+   string(19) "2021-06-06 19:19:12"
+   ["fullname"]=>
+   string(9) "./app.php"
+
+   */
+   foreach( $local_list as $fileinfo):
+         $frDate = date("d/m/Y H:i:s", $fileinfo["mtime"] );
+         $fname= $fileinfo["fullname"];
+         echo "$frDate$_ORAN $fname $_DEF\n";
+   endforeach;
 }//scan
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
