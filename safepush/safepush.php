@@ -48,6 +48,12 @@ for($i=0; $i<count($argv); $i++)
 
 
 
+
+
+//Greetings --------------------
+echo "$_YELL $APP_NAME"." Version $VERSION $_DEF - TZ: $tz\n";
+
+
 $dtNow = new DateTime();
 $dtMinsAgo= clone $dtNow;
 $ts = $dtNow->getTimestamp();
@@ -56,10 +62,10 @@ $dtMinsAgo->setTimestamp($ts-($minutesAgo*60) );
 
 
 echo "file modification time : $_ORAN$minutesAgo $_DEF minutes ago\n";
-echo "Search files mdate after : ". $dtMinsAgo->format("Y-m-d H:i:s") ."\nDate FR:\n$_LGREEN". $dtMinsAgo->format("d/m/Y H:i:s") ."$_DEF\n";
+echo "Search files mdate after : ". $dtMinsAgo->format("Y-m-d H:i:s") ." - $_GREEN". $dtMinsAgo->format("d/m/Y H:i:s") ."$_DEF\n";
 if(count($excludes)>0) 
 {
-    echo "Exclusion patterns : \n$_ORAN".implode("\n",$excludes)." $_DEF\n";    
+    echo "Exclusion patterns : \n$_MAG".implode("\n",$excludes)." $_DEF\n";    
 }else{
     echo "$_ORAN 0$DEF exclusion pattern\n";
 }
@@ -162,7 +168,8 @@ function visi_job($value)
 }//visi_job
 
 
-function dirToArray($dir, $fn) {       
+function dirToArray($dir, $fn) 
+{       
    global $ignoredPaths;
     $result = array();
 
@@ -200,12 +207,13 @@ function dirToArray($dir, $fn) {
     return $result;
  }//dir to array
  
-function scan($dir)
+
+ function scan($dir)
 {
    global $local_list, $_ORAN, $_DEF;
    $local_list=array();//reset list
    $results =  dirToArray($dir,"visi_job");   
-   //var_dump( $results );
+   //var_dump( $results ); //Tous les dirs
    $cnt = count($local_list);
    echo " $cnt fichier(s) trouvé(s).\n";
       /*
@@ -215,63 +223,26 @@ function scan($dir)
    string(9) "./app.php"
 
    */
+   $directories=array();
    foreach( $local_list as $fileinfo):
          $frDate = date("d/m/Y H:i:s", $fileinfo["mtime"] );
          $fname= $fileinfo["fullname"];
-         echo "$frDate$_ORAN $fname $_DEF\n";
+         $dir = dirname( $fname);
+
+         if( ! array_key_exists($dir, $directories) ) { $directories[$dir]=array(); }
+         $directories[$dir][] = $fname;
+
+         echo $frDate."$_ORAN $fname $_DEF\n";
    endforeach;
+
+   //Parcourir les dir et demander les modifications sur le serveur (Gain de temps car requete sur les dirs et non par fichier
+   foreach( $directories as $dir):
+        //curlRequest()
+   endforeach;
+
 }//scan
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//Greetings --------------------
-echo "$_YELL $APP_NAME"." Version $VERSION $_DEF - TZ: $tz\n";
-
-$tasks=".vscode/tasks.json";
-
-if(!file_exists($tasks))
-{
-    echo "$_LRED'$tasks' does not exists.$_DEF\n";
-    die("Oups...\n");
-}
-
-$tasks_json=file_get_contents($tasks);
-
-$tjson = json_clean_decode($tasks_json);
-
-if($tjson===null)
-{
-    echo "$_LRED decode $tasks failed.$_DEF\n".getLastJsonError()."\n";
-
-    die("Sorry...\n");
-}
-
-
- 
 
 /// SafePush Tool Version 1.03  2021-06-05 19:29:55
 // Exemple de résultat
@@ -318,39 +289,72 @@ function curlRequest($url)
         return $result;  
 }//curlRequest
 
+//---------------------------------------    Point d'entrée          -------------------------
+$tasks=".vscode/tasks.json";
 
+if(!file_exists($tasks))
+{
+    echo "$_LRED'$tasks' does not exists.$_DEF\n";
+    die("Oups...\n");
+}
+
+$tasks_json=file_get_contents($tasks);
+
+$tjson = json_clean_decode($tasks_json);
+
+if($tjson===null)
+{
+    echo "$_LRED decode $tasks failed.$_DEF\n".getLastJsonError()."\n";
+
+    die("Sorry...\n");
+}
+
+
+ 
 
 
 //var_dump($tasks_json ,$tjson);
 //var_dump( $tjson->credentials );
 
-scan(".");
+//scan(".");
    
 
 
 
 
-
-
-// $sepDate = array("  "," ");//Séparateur de date dans la chaine exemple: Jun  5 18:58 scripts.js
-// $url="ftp://adminev02:Qwy_613m@151.236.37.12:21//httpdocs/stationpilotage/";
-// $content = curlRequest($url);
-// $lines = explode("\n",$content);
-
-// foreach($lines as $line_untrimmed):
-//     $line =  trim($line_untrimmed);   //-rw-r--r--   1 adminev02 psacln      16944 Jun  5 18:58 scripts.js
-//     if( $line )
-//     {
-//         $parts = preg_split('/\s+/', $line);
-//         //echo "parts:";var_dump($parts);
-//         //echo "Line: [$line]";
-//         $filesize=$parts[4];
-//         $filedate=$parts[5].$sepDate[0].$parts[6].$sepDate[1].$parts[7];
-//         //séparer gauche et droite, pour avoir le nom du fichier
-//         $pair = explode($filedate,$line);
-//         if(count($pair)>1) $filename=trim($pair[1]);else echo "Prob avec ligne:[$line]\n";
-//         //var_dump($filesize,$filedate,$filename);
-//     }
-// endforeach;
+$sepDate = array(" "," ");//Séparateur de date dans la chaine exemple: Jun  5 18:58 scripts.js
+$url=""; die("url vide");
+$content = curlRequest($url);
+$lines = explode("\n",$content);
+$remoteInfos=array();
+foreach($lines as $line_untrimmed):
+    $line =  trim($line_untrimmed);   //-rw-r--r--   1 adminev02 psacln      16944 Jun  5 18:58 scripts.js
+    if( $line )
+    {
+        $parts = preg_split('/\s+/', $line);
+        //echo "parts:";var_dump($parts);
+        //echo "Line: [$line]";
+        $filesize=$parts[4];
+        $filedate=$parts[5]." ".$parts[6].$sepDate[1].$parts[7];
+        $dhm=$parts[6].$sepDate[1].$parts[7];
+        //séparer gauche et droite, pour avoir le nom du fichier
+        $pair = explode($dhm,$line);
+        if(count($pair)>1)
+        {
+             $filename=trim($pair[1]);
+             $datetime = strToTime($filedate); //la date est au fuseau local (puisque curl la convertie pour nous)
+             $infos = compact("filesize","datetime","filedate","filename");
+             $remoteInfos[]=$infos;
+             echo "\nLine OK [$line]\n";
+             var_dump($infos);
+        }
+        else 
+        {
+            echo "date[$filedate] pair :" ;var_dump( $pair);
+            echo "Prob avec ligne:[$line]\n";            
+        }
+        //var_dump($filesize,$filedate,$filename);
+    }
+endforeach;
          
 ?>
