@@ -1,62 +1,37 @@
-#!/bin/env php
 <?php
-$nowStr = date("d/m/Y H:i:s") ;
-$APP_NAME="SafePush Tool";
-$VERSION="1.03";
 
-include_once("common.php");
-
+//2021-06-12 10:39:50 - Fichier récupérateurs des derniers fichiers modifiés sur un serveur
 
 date_default_timezone_set($tz="America/Martinique");
-$excludes=array("./vscode/metadata");
-$minutesAgo=720; // 720minutes => 12h
+
+$excludes=array(
+    "./vendor/"
+    ,"\/uploads/"
+    ,"./_conn_/"); //Exclude patterns
+
+$daysAgo=2; // 2 derniers jours à partir de la date la plus récente du serveur
+//$nLastFiles=1; // 20 derniers fichiers
 $VERBOSE = false;
-
-//récupérer les arguments :    $>    safepush -x "pattern to exclude"  -x "pattern2 to exclude" -t minutesAgo
-for($i=0; $i<count($argv); $i++)
-{
-    $arg = $argv[$i];
-    if( ($arg === "-t" ) || ( $arg === "-m" ) || ( $arg === "--minutes" )  || ( $arg === "--min" ) )
-    {
-        $minutesAgo=intval($argv[$i+1] );
-    }   
-    if(  ($arg === "-x") || ($arg === "--exclude")  )
-    {
-        $exclude= ($argv[$i+1] );
-        $excludes[]=$exclude;
-    }    
-    if(  ($arg === "-v")  )
-    {
-        $VERBOSE=true;
-    }    
-}
-//var_dump( $argv); die("arg pose");
-
-
-
-$dtNow = new DateTime();
-$dtMinsAgo= clone $dtNow;
-$ts = $dtNow->getTimestamp();
-$dtMinsAgo->setTimestamp($ts-($minutesAgo*60) );
  
 
 
-echo "file modification time : $_ORAN$minutesAgo $_DEF minutes ago\n";
-echo "Search files mdate after : ". $dtMinsAgo->format("Y-m-d H:i:s") ."\nDate FR:\n$_LGREEN". $dtMinsAgo->format("d/m/Y H:i:s") ."$_DEF\n";
-if(count($excludes)>0) 
-{
-    echo "Exclusion patterns : \n$_ORAN".implode("\n",$excludes)." $_DEF\n";    
-}else{
-    echo "$_ORAN 0$DEF exclusion pattern\n";
-}
+$dtNow = new DateTime();
+$dtAgo= clone $dtNow; //dtDaysAgo
+$ts = $dtNow->getTimestamp();
+$minutesAgo = $daysAgo * 24 *60; //convertir en minute pour récupérer l'ancien code qui suit
+$dtAgo->setTimestamp($ts-($minutesAgo*60) );
+ 
 
-$ignoredPaths[]="/home/boony/Documents/dev/web"; //path to ignore
+
+$ignoredPaths=array();
+//$ignoredPaths[]="./vendor"; //path to ignore analyse
+
 //visi_job functionn
 $local_list=array(); 
 
 function visi_job($value)
 {
-    global $local_list,$dtMinsAgo, $excludes, $VERBOSE;
+    global $local_list,$dtAgo, $excludes, $VERBOSE;
        $modif_time_ts = filemtime($value);
        //var_dump($value, date("F d Y H:i:s",$modif_time_ts) );     
     // $dtw =new DateTime( ); $dtw->setTimestamp($modif_time_ts);
@@ -79,7 +54,7 @@ function visi_job($value)
        endforeach;
        if($allowed)
        {
-            if( $modif_time_ts > $dtMinsAgo->getTimestamp() )
+            if( $modif_time_ts > $dtAgo->getTimestamp() )
             {
                    if($VERBOSE)  echo "ADD : '$fullname' [$filemtime]\n";
                    $local_list[]=compact("filemtime","fullname","mtime");
@@ -127,15 +102,18 @@ function dirToArray($dir, $fn) {
  
     return $result;
  }//dir to array
- 
+
+
+
+
 function scan($dir)
 {
-   global $local_list, $_ORAN, $_DEF;
+   global $VERBOSE, $local_list ;
    $local_list=array();//reset list
    $results =  dirToArray($dir,"visi_job");   
    //var_dump( $results );
    $cnt = count($local_list);
-   echo " $cnt fichier(s) trouvé(s).\n";
+   if($VERBOSE) echo " $cnt fichier(s) trouvé(s).\n";
       /*
        ["filemtime"]=>
    string(19) "2021-06-06 19:19:12"
@@ -146,72 +124,12 @@ function scan($dir)
    foreach( $local_list as $fileinfo):
          $frDate = date("d/m/Y H:i:s", $fileinfo["mtime"] );
          $fname= $fileinfo["fullname"];
-         echo "$frDate$_ORAN $fname $_DEF\n";
+         echo "$frDate => $fname \n";
    endforeach;
 }//scan
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//Greetings --------------------
-echo "$_YELL $APP_NAME"." Version $VERSION $_DEF - TZ: $tz\n";
-
-$tasks=".vscode/tasks.json";
-
-if(!file_exists($tasks))
-{
-    echo "$_LRED'$tasks' does not exists.$_DEF\n";
-    die("Oups...\n");
-}
-
-$tasks_json=file_get_contents($tasks);
-
-$tjson = json_clean_decode($tasks_json);
-
-if($tjson===null)
-{
-    echo "$_LRED decode $tasks failed.$_DEF\n".getLastJsonError()."\n";
-
-    die("Sorry...\n");
-}
-
-
- 
-
-/// SafePush Tool Version 1.03  2021-06-05 19:29:55
-
-
-
-//var_dump($tasks_json ,$tjson);
-//var_dump( $tjson->credentials );
-
 scan(".");
-   
-
-
-
 
 ?>
