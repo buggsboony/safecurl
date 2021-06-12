@@ -214,27 +214,4 @@ scan(".");
 
 
 
-
-
-// $sepDate = array("  "," ");//Séparateur de date dans la chaine exemple: Jun  5 18:58 scripts.js
-// $url="ftp://adminev02:Qwy_613m@151.236.37.12:21//httpdocs/stationpilotage/";
-// $content = curlRequest($url);
-// $lines = explode("\n",$content);
-
-// foreach($lines as $line_untrimmed):
-//     $line =  trim($line_untrimmed);   //-rw-r--r--   1 adminev02 psacln      16944 Jun  5 18:58 scripts.js
-//     if( $line )
-//     {
-//         $parts = preg_split('/\s+/', $line);
-//         //echo "parts:";var_dump($parts);
-//         //echo "Line: [$line]";
-//         $filesize=$parts[4];
-//         $filedate=$parts[5].$sepDate[0].$parts[6].$sepDate[1].$parts[7];
-//         //séparer gauche et droite, pour avoir le nom du fichier
-//         $pair = explode($filedate,$line);
-//         if(count($pair)>1) $filename=trim($pair[1]);else echo "Prob avec ligne:[$line]\n";
-//         //var_dump($filesize,$filedate,$filename);
-//     }
-// endforeach;
-         
 ?>
