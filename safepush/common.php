@@ -16,8 +16,8 @@ $_LMAG="\033[1;35m";
 $_CYAN="\033[0;36m";
 $_LCYAN="\033[1;36m";
 
-
-
+//2021-06-12 13:11:48 starts with function for older php
+function startsWith($haystack, $needle) { $length = strlen($needle); return (substr($haystack, 0, $length) === $needle); } 
 
 /**
  * Clean comments of json content and decode it with json_decode().
@@ -122,4 +122,68 @@ function curlRequest($url)
 }//curlRequest
 
 
+
+
+//----------- vscode tasks read ----------------------------
+// {
+//     "label": "ftp_download",
+//     "type": "shell",
+//     "command": "safecurl",
+//     "args": [
+//         "ftp://${config:tasks.credentials}/${config:tasks.context}/${relativeFile}",
+//         "-o",
+//         "${file}",
+//         "--create-dirs"
+//         ,"--check"
+//         ,".vscode/metadata/${relativeFile}"
+//     ],
+//     "group": "build",
+//     "problemMatcher": []
+// }
+
+
+
+//Find a vscode task by label
+function findTask($tjson,$label)
+{
+    foreach($tjson->tasks as $task):
+        if($task->label==$label)
+        return $task;
+    endforeach;
+    return null; //none found
+}//find vscode findTask
+
+function rplcVscodeVars($tjson,$var_vals, $str)
+{
+  foreach($var_vals as $var=>$val)
+  {
+      $str = str_replace($var,$val,$str);
+  }
+  return $str;
+}
+
+//Try to execute vscode task
+function runtask($task,$tjson,$args)
+{   
+     $vscode_vars = array(
+        "\${config:tasks.credentials}"=>$tjson->credentials
+        ,"\${config:tasks.context}"=>$tjson->context
+        ,"\${relativeFile}"=>$args["relativeFile"]     
+        ,"\${file}"=>$args["file"]        
+    );
+    //"ftp://${config:tasks.credentials}/${config:tasks.context}/${relativeFile}"
+    $fullcom="";
+    $command = $task->command;
+    $args = $task->args;
+    foreach($args as &$arg):
+        //echo "AVANT :[$arg]\n";
+        $arg = "\"".rplcVscodeVars($tjson, $vscode_vars, $arg)."\"";
+        //echo "arg Apres [$arg] :";
+    endforeach;
+    $argstr= implode(" ",$args);
+    $fullcom=$command." ".$argstr;
+    echo "\nfullcom=[$fullcom]\n";
+    //exec()
+    //var_dump($task);
+}//safecurl command
 ?>

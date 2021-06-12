@@ -9,9 +9,10 @@ include_once("common.php");
 
 
 date_default_timezone_set($tz="America/Martinique");
+$workspace = getcwd(); //grab vscode workspace path
 $excludes=array("./.vscode/metadata");
-$daysAgo=2; // 2 derniers jours à partir de la date la plus récente du serveur
-$nLastFiles=1; // 20 derniers fichiers
+$daysAgo=15; // 2 derniers jours à partir de la date la plus récente du serveur
+$nLastFiles=6; // 20 derniers fichiers
 $VERBOSE = false;
 
 //récupérer les arguments :    $>    safepull -t 2  ou  -n 10 
@@ -40,7 +41,6 @@ $dtDaysAgo= clone $dtNow;
 $ts = $dtNow->getTimestamp();
 $minutesAgo = $daysAgo * 24 *60; //convertir en minute pour récupérer l'ancien code qui suit
 $dtDaysAgo->setTimestamp($ts-($minutesAgo*60) );
- 
 
 
 echo "file modification time : $_ORAN$daysAgo $_DEF days ago\n";
@@ -49,7 +49,7 @@ if(count($excludes)>0)
 {
     echo "exclusion patterns : \n$_ORAN".implode("\n",$excludes)." $_DEF\n";    
 }else{
-    echo "$_ORAN 0$DEF exclusion patterns\n";
+    echo "$_ORAN 0$_DEF exclusion patterns\n";
 }
 
 
@@ -76,221 +76,46 @@ if($tjson===null)
 }
 
 
-
-
-
-
-//$dir = $tjson->context;
-// $url="ftp://".$tjson->credentials."/".$dir."/"; //Slash à la fin pour demander la liste contenu par le dossier
-// //echo "url:"; var_dump( $url );
-// $content="-rw-r--r--   1 adminev02 psacln      12999 Jun 11 14:22 app.php\n"; //exemple avec un fichier
-// $content="drwxr-xr-x   2 adminev02 psacln          6 Apr 28 11:24 class\n"; //Exemple avec un dossier
-// //$content = curlRequest($url);
-// $lines = explode("\n",$content);
-// $sepDate = array(" "," ");//Séparateur de date dans la chaine exemple: Jun  5 18:58 scripts.js
-
-// $list=array();
-// foreach($lines as $line_untrimmed):
-//     $line =  trim($line_untrimmed);   //-rw-r--r--   1 adminev02 psacln      16944 Jun  5 18:58 scripts.js
-//     if( $line )
-//     {
-//         $parts = preg_split('/\s+/', $line);
-//         $type=$parts[0][0];
-//         echo "parts:";var_dump($parts);
-//         echo "\nLine: [$line]\n";
-//         $filesize=$parts[4];
-//         $day_and_hours=$parts[6].$sepDate[1].$parts[7];
-//         $filedate=$parts[5].$sepDate[0].$day_and_hours;
-//         $ident_split = $filesize." ".$parts[5];
-//         //séparer gauche et droite, pour avoir le nom du fichier
-//         $pair = explode($day_and_hours,$line);
-//         $filename=null;
-//         if(count($pair)>1) $filename=trim($pair[1]);
-//         else echo "Prob avec ligne:[$line]\n";
-//         $datetime=date("Y-m-d H:i:s", $timestamp=strtotime($filedate) );        
-//         //echo "analyse:";var_dump($filesize,$filedate,$filename);
-//         $fullname=$dir."/".$filename;
-//         $key=$timestamp."_".$fullname;//sort key
-//         $current=compact("type","fullname","filename", "filedate", "filesize");
-//         //Sort by date desc :
-//         $list[$key]=$current;
-//     }
-// endforeach;
-//          krsort($list);
-//          $keys = array_keys($list);
-//          $latestDateKey = $keys[0];
-//          echo "Latest file date is : ".$latestDateKey."\n";
-//          //echo "\nkrsort=>\n";var_dump($list);
-
 $URL_BASE="ftp://".$tjson->credentials;
-function getFileList($dir)
+$urlweb=$tjson->url;
+echo "Request for last $nLastFiles latest files.\n";
+$url_latestfiles=$urlweb."/latestfiles.php?pwd=safecurl&d=".$daysAgo."&n=".$nLastFiles;
+echo "url lastfiles :$_ORAN $url_latestfiles $_DEF\n";
+$content = file_get_contents($url_latestfiles);
+$lines = explode("\n", $content);
+$files=array();
+foreach($lines as $line)
 {
-    global $URL_BASE;
-    $url=$URL_BASE."/".$dir."/"; //Slash à la fin pour demander la liste contenu par le dossier
-    //echo "url:"; var_dump( $url );
-    // $content="-rw-r--r--   1 adminev02 psacln      12999 Jun 11 14:22 app.php\n"; //exemple avec un fichier
-    // $content="drwxr-xr-x   2 adminev02 psacln          6 Apr 28 11:24 class\n"; //Exemple avec un dossier
-    $content = curlRequest($url);
-    $lines = explode("\n",$content);
-    $sepDate = array(" "," ");//Séparateur de date dans la chaine exemple: Jun  5 18:58 scripts.js
-    
-    $list=array();
-    foreach($lines as $line_untrimmed):
-        $line =  trim($line_untrimmed);   //-rw-r--r--   1 adminev02 psacln      16944 Jun  5 18:58 scripts.js
-        if( $line )
-        {
-            $parts = preg_split('/\s+/', $line);
-            $type=$parts[0][0];
-            // echo "parts:";var_dump($parts);
-            // echo "\nLine: [$line]\n";
-            $filesize=$parts[4];
-            $day_and_hours=$parts[6].$sepDate[1].$parts[7];
-            $filedate=$parts[5].$sepDate[0].$day_and_hours;
-            $ident_split = $filesize." ".$parts[5];
-            //séparer gauche et droite, pour avoir le nom du fichier
-            $pair = explode($day_and_hours,$line);
-            $filename=null;
-            if(count($pair)>1) $filename=trim($pair[1]);
-            else echo "Prob avec ligne:[$line]\n";
-            $datetime=date("Y-m-d H:i:s", $timestamp=strtotime($filedate) );        
-            //echo "analyse:";var_dump($filesize,$filedate,$filename);
-            $fullname=$dir."/".$filename;
-            $key=$timestamp."_".$fullname;//sort key
-            $current=compact("type","fullname","filename", "filedate", "filesize");
-            //Sort by date desc :
-            $list[$key]=$current;
-        }
+    $file = explode(";",$line);
+    $datetime=$file[2];
+    $mtime=$file[1]; $frdate=date("d/m/Y H:i:s", $mtime);
+    $fname=$file[0];
+    $files[]=$file;
+    echo "$_GREEN $frdate - $fname$_DEF\n";
+}
+echo count($files)." files found.\n";
+$resp = trim( strtolower( readline("Confirm SafeCurl download (yes,y,oui,o/no) :\n") ));
+if( ( $resp[0] =="o" ) || ( $resp[0]=="y" ) )
+{    
+    //   var_dump($files);
+    $task_ftp_download = findTask($tjson,"ftp_download");
+    foreach($files as $file):                
+         $relativeFile = $fname=$file[0];
+        if( startsWith($relativeFile,"./") ) $relativeFile = substr($relativeFile,2); //enlever le ./ devant le relative filename        
+        $vscode_local_file = $workspace.DIRECTORY_SEPARATOR.$relativeFile;
+
+        echo "running task: $_YELL".$task_ftp_download->label."$_DEF\n";
+        $args = array(
+            "relativeFile"=>$relativeFile
+            ,"file"=>$vscode_local_file
+        );
+        runtask($task_ftp_download, $tjson, $args);    
     endforeach;
-             krsort($list);
-             $keys = array_keys($list);
-             $latestDateKey = $keys[0];
-            // echo "Latest file date is : ".$latestDateKey."\n";
-             //echo "\nkrsort=>\n";var_dump($list);
-    return $list;    
-} //getFileList
-
-
-//Version 1 2021-06-12 00:06:54
-// function getLatestFiles($dir,$count)
-// {
-   
-//     $list = getFileList($dir);
-//     //récupérer les count premiers et regarder si parmi eux ya un dossier
-//     $tops = array_chunk($list,$count);
-//     $top=$tops[0];//Normalement yaura toujours au moins, qui aura soit la taille, soit moins
-//     //echo "top=";var_dump($top[0]);
-//     $c=0; $cf=0;
-//     $filelist=array();//Liste de fichiers épurée (sans les dossiers)
-//     foreach($top as $t):
-//         $c++; //just count
-//         echo "[$dir]====>  $c/$count [".$t["fullname"]."]\n";
-//         if($cf>=$count)
-//         {  //Le compte de fichier est atteint, on sort
-//             return $filelist;
-//         }else
-//         {
-//             //Vérifier le prochain sous dossier
-//             if($t["type"]=="d")
-//             { //répertoire trouvé
-//                 $subdir = $dir."/".$t["filename"];
-//                 $countRemain=$count-$c;
-//                 $sublist = getLatestFiles($subdir,$countRemain);
-//                 $filelist = array_merge( $filelist, $sublist);
-//             }else
-//             { //it's a file, just add
-//                 $cf++; //just count
-//                 echo "[$dir]++++> $cf/$count [".$t["fullname"]."]\n";
-//                 $filelist[]=$t;
-//             }
-//         }
-
-//     endforeach;
-//     return $filelist; //count non atteind
-// }//getLatestFiles
-
-
-//version 1
-// function getLatestFiles($dir,$count)
-// {
-   
-//     $list = getFileList($dir);
-//     //récupérer les count premiers et regarder si parmi eux ya un dossier
-//     $tops = array_chunk($list,$count);
-//     $top=$tops[0];//Normalement yaura toujours au moins, qui aura soit la taille, soit moins
-//     //echo "top=";var_dump($top[0]);
-//     $c=0; $cf=0;
-//     $filelist=array();//Liste de fichiers épurée (sans les dossiers)
-//     foreach($top as $t):
-//         $c++; //just count
-//         echo "[$dir]====>  $c/$count [".$t["fullname"]."]\n";
-//         if($cf>=$count)
-//         {  //Le compte de fichier est atteint, on sort
-//             return $filelist;
-//         }else
-//         {
-//             //Vérifier le prochain sous dossier
-//             if($t["type"]=="d")
-//             { //répertoire trouvé
-//                 $subdir = $dir."/".$t["filename"];
-//                 $countRemain=$count-$c;
-//                 $sublist = getLatestFiles($subdir,$countRemain);
-//                 $filelist = array_merge( $filelist, $sublist);
-//             }else
-//             { //it's a file, just add
-//                 $cf++; //just count
-//                 echo "[$dir]++++> $cf/$count [".$t["fullname"]."]\n";
-//                 $filelist[]=$t;
-//             }
-//         }
-
-//     endforeach;
-//     return $filelist; //count non atteind
-// }//getLatestFiles
-
-//version 2
-function getLatestFiles($dir,$count)
+}else
 {
-   
-    $list = getFileList($dir);
-    echo "\n\n\n\nfull list :\n";var_dump($list);
-    //récupérer les count premiers et regarder si parmi eux ya un dossier
-    $tops = array_chunk($list,$count);
-    $top=$tops[0];//Normalement yaura toujours au moins, qui aura soit la taille, soit moins
-    echo "\n\ntop=";var_dump($top[0]);
-    $c=0; $cf=0;
-    $filelist=array();//Liste de fichiers épurée (sans les dossiers)
-    foreach($top as $k=>$t):
-        $c++; //just count
-        echo "[$dir]====>  $c/$count [".$t["fullname"]."]\n";
-        if($cf>=$count)
-        {  //Le compte de fichier est atteint, on sort
-            return $filelist;
-        }else
-        {
-            //Vérifier le prochain sous dossier
-            if($t["type"]=="d")
-            { //répertoire trouvé
-                $subdir = $dir."/".$t["filename"];
-                $countRemain=$count-$c;
-                $sublist = getLatestFiles($subdir,$countRemain);
-                $filelist = array_merge( $filelist, $sublist);
-            }else
-            { //it's a file, just add
-                $cf++; //just count
-                echo "[$dir]++++> $cf/$count [".$t["fullname"]."]\n";
-                $filelist[$k]=$t;
-            }
-        }
-
-    endforeach;
-    return $filelist; //count non atteind
-}//getLatestFiles
-
-
-$latestFiles = getLatestFiles($tjson->context, $nLastFiles );
-//krsort($latestFiles); //Sort again
-echo "sorted latestFiles($nLastFiles): \n ";
-var_dump($latestFiles);
+    echo $_WHITE."Terminé.$_DEF\n";
+    exit;
+}
 
 
 
