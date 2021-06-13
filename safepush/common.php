@@ -164,7 +164,8 @@ function rplcVscodeVars($tjson,$var_vals, $str)
 
 //Try to execute vscode task
 function runtask($task,$tjson,$args)
-{   
+{
+    global $_ORAN,$_DEF;
      $vscode_vars = array(
         "\${config:tasks.credentials}"=>$tjson->credentials
         ,"\${config:tasks.context}"=>$tjson->context
@@ -182,8 +183,8 @@ function runtask($task,$tjson,$args)
     endforeach;
     $argstr= implode(" ",$args);
     $fullcom=$command." ".$argstr;
-    echo "\nfullcom=[$fullcom]\n";
-    //exec()
+    echo "Running command : [$_ORAN$fullcom$_DEF]\n";
+    exec($fullcom);
     //var_dump($task);
 }//safecurl command
 ?>
