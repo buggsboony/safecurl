@@ -29,7 +29,7 @@ for($i=0; $i<count($argv); $i++)
         $nLastFiles=intval($argv[$i+1] );
     }  
 
-    if(  ($arg === "-s") || ($arg === "--skip") )
+    if(  ($arg === "-s") || ($arg === "--skip") || ($arg === "-i") || ($arg === "--ignore") )
     {
         $skipFirstNfiles=intval($argv[$i+1] );
     }    
