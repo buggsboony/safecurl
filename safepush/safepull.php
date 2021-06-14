@@ -85,7 +85,14 @@ if($tjson===null)
 
 
 $URL_BASE="ftp://".$tjson->credentials;
-$urlweb=$tjson->url;
+if( property_exists($tjson,"url") )
+{
+    $urlweb=$tjson->url;
+}else
+{
+    echo $_RED."Oups, url property is missing in file '$tasks'$_DEF\n";
+    exit;
+}
 echo "Request for last $nLastFiles latest files.\n";
 $url_latestfiles=$urlweb."/latestfiles.php?pwd=safecurl&d=".$daysAgo."&n=".$nLastFiles;
 echo "URL lastfiles :$_ORAN $url_latestfiles $_DEF\n";

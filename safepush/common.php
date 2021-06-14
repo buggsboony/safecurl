@@ -183,7 +183,7 @@ function runtask($task,$tjson,$args)
     endforeach;
     $argstr= implode(" ",$args);
     $fullcom=$command." ".$argstr;
-    echo "Running command : [$_ORAN$fullcom$_DEF]\n";
+    echo "Running command : \n[$_ORAN$fullcom$_DEF]\n";
     exec($fullcom);
     //var_dump($task);
 }//safecurl command
