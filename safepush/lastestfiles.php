@@ -1,6 +1,24 @@
 <?php
+//Fichier récupérateurs des derniers fichiers modifiés sur un serveur
+//Version du 2021-06-12 11:21:58
+//Utilisation :
+//http://ei-eval02.com/stationpilotage/latestfiles.php?pwd=safecurl&d=12&n=6
 
-//2021-06-12 10:39:50 - Fichier récupérateurs des derniers fichiers modifiés sur un serveur
+if(  !isset($_REQUEST["pwd"]) )
+{
+    die("pwd");
+}
+
+$pwd=$_REQUEST["pwd"];
+if($pwd=="safecurl")
+{
+    //ok
+}else
+{
+    die("Oups, bad pwd");
+}
+
+
 
 date_default_timezone_set($tz="America/Martinique");
 
@@ -9,10 +27,24 @@ $excludes=array(
     ,"\/uploads/"
     ,"./_conn_/"); //Exclude patterns
 
-$daysAgo=2; // 2 derniers jours à partir de la date la plus récente du serveur
-//$nLastFiles=1; // 20 derniers fichiers
-$VERBOSE = false;
+$daysAgo=2;
+if( isset($_REQUEST["d"]) )
+{    
+    $daysAgo=intval($_REQUEST["d"]); // x derniers jours à partir de la date la plus récente du serveur
+}
  
+$nLastFiles=null; // 20 derniers fichiers
+if( isset($_REQUEST["n"]) )
+{    
+    $nLastFiles=intval($_REQUEST["n"]);
+}
+
+$VERBOSE = false;
+if( isset($_REQUEST["v"]) )
+{    
+    $VERBOSE=intval($_REQUEST["v"]);  
+}
+
 
 
 $dtNow = new DateTime();
@@ -40,6 +72,7 @@ function visi_job($value)
        $filemtime = date("Y-m-d H:i:s",$modif_time_ts);
        $mtime = $modif_time_ts;
        $fullname=$value;  
+       $isdir = is_dir($value);
        
        $allowed=true;
        foreach( $excludes as $pattern):
@@ -49,15 +82,15 @@ function visi_job($value)
                 $allowed=true;
             }else
             {
-                if($VERBOSE) echo "EXCLUDE : [$fullname]\n";
+                if($VERBOSE>1) echo "EXCLUDE : [$fullname]\n";
             }
        endforeach;
        if($allowed)
        {
             if( $modif_time_ts > $dtAgo->getTimestamp() )
             {
-                   if($VERBOSE)  echo "ADD : '$fullname' [$filemtime]\n";
-                   $local_list[]=compact("filemtime","fullname","mtime");
+                   if($VERBOSE>1)  echo "ADD : '$fullname' [$filemtime]\n";
+                   $local_list[]=compact("isdir","filemtime","fullname","mtime");
             }
        }//endif allowed
     
@@ -108,28 +141,47 @@ function dirToArray($dir, $fn) {
 
 function scan($dir)
 {
-   global $VERBOSE, $local_list ;
+   $jsonlist=array();
+   global $VERBOSE, $dtAgo,$nLastFiles, $local_list ;
    $local_list=array();//reset list
    $results =  dirToArray($dir,"visi_job");   
    //var_dump( $results );
    $cnt = count($local_list);
    if($VERBOSE) echo " $cnt fichier(s) trouvé(s).\n";
-      /*
-       ["filemtime"]=>
-   string(19) "2021-06-06 19:19:12"
-   ["fullname"]=>
-   string(9) "./app.php"
-
-   */
+      /*       
+               ["filemtime"]=>   string(19) "2021-06-06 19:19:12"
+               ["fullname"]=>   string(9) "./app.php"
+      */
    foreach( $local_list as $fileinfo):
-         $frDate = date("d/m/Y H:i:s", $fileinfo["mtime"] );
+      if($VERBOSE>1) { echo "fileinfo: "; var_dump( $fileinfo); }
+         $mtime= $fileinfo["mtime"] ;
+         $datetime = date("Y-m-d H:i:s", $fileinfo["mtime"] );
+         $frDate = date($frFormat="d/m/Y H:i:s", $fileinfo["mtime"] );
          $fname= $fileinfo["fullname"];
-         echo "$frDate => $fname \n";
+         $isdir= $fileinfo["isdir"];
+         //echo "$frDate => $fname \n";
+         //$jsonlist[]=compact("fname", "mtime", "datetime");
+         //if($mtime>$dtAgo->getTimestamp()) 
+         if(!$isdir) //Si c'est un fichier, on empile
+         {
+           $jsonlist[$mtime]=$fname.";".$mtime.";".$datetime;
+         }
    endforeach;
+   krsort($jsonlist);//sort by date desc
+   if($nLastFiles)
+   {
+     //Tronquer :
+      $topN = array_chunk($jsonlist,$nLastFiles)[0];
+      return $topN;
+   }
+   return $jsonlist;
 }//scan
 
 
-
-scan(".");
-
+if($VERBOSE) echo "<textarea style=\"width:100%;height:100%; background-color:#565;\">";
+$jsonlist = scan(".");
+if($VERBOSE) echo count($jsonlist)." fichiers(s)\n";
+//echo json_encode($jsonlist,JSON_PRETTY_PRINT);
+echo implode("\n",$jsonlist);
+if($VERBOSE) echo "</textarea>";
 ?>

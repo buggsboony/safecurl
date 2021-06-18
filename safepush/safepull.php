@@ -100,6 +100,7 @@ $content = file_get_contents($url_latestfiles);
 $lines = explode("\n", $content);
 $files=array();
 $npos=0;
+//Affichage de la liste
 foreach($lines as $line)
 {
     $file = explode(";",$line);
@@ -134,6 +135,7 @@ if( ( $resp[0] =="o" ) || ( $resp[0]=="y" ) )
                 "relativeFile"=>$relativeFile
                 ,"file"=>$vscode_local_file
             );
+            //Exécuter la task pour télécharger le fichier avec SafeCurl
             runtask($task_ftp_download, $tjson, $args);    
         }
 
