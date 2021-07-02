@@ -37,6 +37,16 @@ for($i=0; $i<count($argv); $i++)
     if(  ($arg === "-v")  )
     {
         $VERBOSE=true;
+    }   
+    if(  ($arg === "--help")  )
+    {
+        
+        echo "Arguments : 
+            --days or -j or -t (time , days ago) #default is 2
+            -v verbose level #example : -v 1 -v 2
+            -n #last N recent files to be taken, default is 10
+            --skip 8 #Skip pour ignorer les n premiers fichiers du lot\n";
+        exit;
     }    
 }
 //var_dump( $argv); die("arg pose");
