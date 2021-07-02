@@ -235,8 +235,8 @@ begin
      end;
 end;
 
-//Async onEnd Execution
-procedure onEnd(success:boolean; curlAct:AnsiString);
+//Async onEnd Execution , on end script
+procedure onEnd(success:boolean; curlAct, localFile:AnsiString);
 begin
    onEndRan:=true;
    textcolor(LightGray);
@@ -249,6 +249,7 @@ begin
    hprocess.Parameters.add(onEndFilename);
    hprocess.Parameters.add(BoolToStr(success,  TRUE) );
    hprocess.Parameters.add(curlAct);
+   hprocess.Parameters.add(localFile);
   // Run asynchronously (wait for process to exit) and use pipes so we can read the output pipe
   hProcess.Options := hProcess.Options + [ poWaitOnExit, poUsePipes];//Run Async + no need to wait
   // Now run:
@@ -292,7 +293,7 @@ sCreatedirs:='';
        sFtpFile:=paramstr(3);
        sCreatedirs:=paramstr(4);         //writeln('sFtpFile=',sFtpFile);
              event_com:=paramstr(5); //--check
-       curlAction:=curlAction +' file '+sFile;
+       curlAction:=curlAction +' -> '+sFile;
 
        if( event_com ='--check') then
        begin
@@ -488,7 +489,7 @@ sCreatedirs:='';
               writeln('OK Success !');
 
                  //----------- Exécuter onEnd async:       +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-                 onEnd(action_succeed,curlAct);
+                 onEnd(action_succeed,curlAct, sFile);
 
                     if(event_com='--check') then
                     begin
@@ -507,7 +508,7 @@ sCreatedirs:='';
               writeln('KO Failed !');
 
                  //----------- Exécuter onEnd async:
-                 onEnd(action_succeed,curlAct);
+                 onEnd(action_succeed,curlAct,sFile);
            end;
            textcolor(LightGray);
 

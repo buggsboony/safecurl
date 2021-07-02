@@ -162,5 +162,5 @@ if( ( $resp[0] =="o" ) || ( $resp[0]=="y" ) )
 echo $_WHITE."Terminé.$_DEF\n";
 
 
-/// TODO , comment procéder quand ils y a des ficheirs datés de 2 années différentes
+/// TODO , comment procéder quand ils y a des fichiers datés de 2 années différentes
 ?>
